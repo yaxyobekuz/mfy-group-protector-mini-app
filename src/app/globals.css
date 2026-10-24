@@ -1,0 +1,249 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * MOBIL ILOVA — RANG VA O'LCHOV TOKENLARI.
+ *
+ * ⚠️ RANGLAR BITTA JOYDA (`:root` + `.dark`) — admin paneldagi bilan
+ * AYNI qoida. Komponentlarda hex yozilmaydi.
+ *
+ * ── NIMA UCHUN KO'K ───────────────────────────────────────────────
+ *
+ * ⚠️ PANEL YASHIL, ILOVA KO'K va bu ataylab. Panel — xodim quroli,
+ * ilova — fuqaro xizmati. Bitta rang ishlatilsa, ekran
+ * skrinshotidan "bu qaysi mahsulot" degan savolga javob yo'qolardi
+ * va qo'llab-quvvatlash xatosi ko'payardi.
+ *
+ * ⚠️ HOLAT RANGLARI ACCENT'DAN ALOHIDA (`--success`, `--warning`,
+ * `--destructive`): ko'k — brend, yashil/sariq/qizil esa MA'NO
+ * tashiydi ("hal qilindi", "kutilmoqda", "rad etildi"). Ikkisi
+ * qo'shilsa, brend rangi holat rangi bilan to'qnashardi.
+ */
+@layer base {
+  :root {
+    /*
+     * ⚠️ FON OQ EMAS: kartalar undan ajralib turishi kerak. Admin
+     * paneldagi bilan AYNI sabab, lekin tusi boshqa (sovuq kulrang).
+     */
+    --background: 215 30% 96%;
+    --foreground: 222 45% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 45% 11%;
+
+    /* Brend — to'yingan ko'k (mockup'dagi tugma rangi). */
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 214 32% 94%;
+    --secondary-foreground: 222 40% 18%;
+
+    --muted: 215 25% 95%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 214 95% 95%;
+    --accent-foreground: 221 83% 40%;
+
+    /* ── HOLAT RANGLARI — MA'NO TASHIYDI ──────────────────────── */
+    --success: 142 71% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 46%;
+    --warning-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 25% 89%;
+    --input: 214 25% 87%;
+    --ring: 221 83% 53%;
+
+    /*
+     * ⚠️ RADIUS PANELDAGIDAN KICHIKROQ (1rem vs 1.25rem): telefon
+     * ekrani tor va juda yirik radius kichik kartada "dumaloq
+     * tabletka" ko'rinishini berardi.
+     */
+    --radius: 1rem;
+
+    --shadow-card: 0 1px 2px -1px hsl(222 45% 11% / 0.05),
+      0 4px 14px -4px hsl(222 45% 11% / 0.08);
+    --shadow-lift: 0 2px 4px -2px hsl(222 45% 11% / 0.06),
+      0 12px 28px -8px hsl(222 45% 11% / 0.14);
+    /*
+     * ⚠️ PASTKI MENYU SOYASI YUQORIGA TUSHADI (manfiy `y`): u
+     * ekranning PASTIDA turadi va odatiy pastga tushgan soya
+     * ko'rinmasdi.
+     */
+    --shadow-nav: 0 -1px 2px hsl(222 45% 11% / 0.04),
+      0 -8px 24px -8px hsl(222 45% 11% / 0.1);
+  }
+
+  .dark {
+    /*
+     * ⚠️ TUNGI REJIM — NEYTRAL KO'MIR, ko'k tusli EMAS. Panelda
+     * bu xato bir marta qilingan va qaytarilgan ("botqoq yashil"):
+     * accent rang hamma joyda bo'lgach, u ACCENT bo'lishdan
+     * to'xtaydi.
+     *
+     * ⚠️ KARTA FONDAN SEZILARLI OCHIQROQ (7% → 12%): tunda soya
+     * KO'RINMAYDI va kartani ajratishning yagona vositasi — shu
+     * farq.
+     */
+    --background: 220 14% 7%;
+    --foreground: 210 20% 96%;
+
+    --card: 220 12% 12%;
+    --card-foreground: 210 20% 96%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 10% 17%;
+    --secondary-foreground: 210 20% 92%;
+
+    --muted: 220 10% 16%;
+    --muted-foreground: 215 14% 65%;
+
+    --accent: 221 40% 22%;
+    --accent-foreground: 213 94% 78%;
+
+    --success: 142 60% 45%;
+    --warning: 38 85% 55%;
+    --destructive: 0 70% 58%;
+
+    --border: 220 8% 22%;
+    --input: 220 8% 24%;
+    --ring: 217 91% 60%;
+
+    --shadow-card: 0 1px 2px -1px hsl(0 0% 0% / 0.5);
+    --shadow-lift: 0 10px 30px -10px hsl(0 0% 0% / 0.7);
+    --shadow-nav: 0 -8px 24px -8px hsl(0 0% 0% / 0.6);
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    /*
+     * ⚠️ "TORTIB YANGILASH" O'CHIRILADI: Telegram mini-ilovasida
+     * pastga tortish oynani YOPADI va sahifa ichidagi ortiqcha
+     * siljish shu harakatni tasodifan ishga tushirardi — fuqaro
+     * to'ldirayotgan murojaatini yo'qotardi.
+     */
+    overscroll-behavior-y: none;
+  }
+
+  /*
+   * ⚠️ MATN TANLASH O'CHIRILGAN — LEKIN KIRITISH MAYDONLARIDA EMAS.
+   * Telegram ichida uzoq bosish matn tanlash menyusini ochadi va u
+   * tugmalarni "bosib bo'lmaydigan" qilib ko'rsatardi. Kiritish
+   * maydonida esa tanlash KERAK: usiz yozganini tuzatib bo'lmaydi.
+   */
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  input,
+  textarea,
+  [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /*
+   * ⚠️ `font-size: 16px` MAJBURIY: iOS Safari 16px dan kichik
+   * maydonga fokus tushganda sahifani AVTOMATIK kattalashtiradi va
+   * undan qaytmaydi — ilova "buzilgan" ko'rinardi.
+   */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+@layer components {
+  /**
+   * TELEGRAM XAVFSIZ SOHASI.
+   *
+   * ⚠️ `env(safe-area-inset-*)` — iPhone'ning pastki chizig'i va
+   * yuqoridagi "o'yiq" uchun. Usiz pastki menyu tugmalari telefon
+   * chizig'i ostida qolib, bosilmay qolardi.
+   */
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /** Pastki menyu balandligi + xavfsiz soha — ro'yxat oxiri uchun. */
+  .pb-nav {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .card {
+    @apply rounded-2xl bg-card text-card-foreground shadow-card;
+  }
+
+  /**
+   * ⚠️ TUGMA BALANDLIGI 48px DAN KAM EMAS: barmoq nishoni uchun
+   * eng kichik qulay o'lcham. Kichikroq tugma telefonda
+   * "bosilmayapti" degan shikoyatni keltirib chiqaradi.
+   */
+  .btn-base {
+    @apply inline-flex min-h-[3rem] items-center justify-center gap-2
+      rounded-xl px-5 text-[15px] font-semibold transition
+      active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
+  }
+}
+
+/**
+ * LEAFLET — XARITA.
+ *
+ * ⚠️ TOKENLARGA MOSLANADI: Leaflet o'z oq fonini va qora matnini
+ * olib keladi va tungi rejimda xarita boshqaruvlari oq quti bo'lib
+ * yonib turardi.
+ */
+.leaflet-container {
+  @apply h-full w-full bg-muted;
+  font: inherit;
+
+  /*
+   * ⚠️ `z-index: 0` MAJBURIY VA BU ENG MUHIM QATOR. Leaflet o'z
+   * qatlamlariga (`.leaflet-pane`) `z-index: 400` beradi va
+   * konteynerning O'ZIDA z-index bo'lmasa, o'sha 400 TASHQI
+   * joylashuv kontekstida hisoblanadi — natijada xarita USTIGA
+   * qo'yilgan har qanday element (qadalgan nuqta, "Tanlangan joy"
+   * kartasi, joylashuv tugmasi) plitkalar OSTIDA qolib,
+   * KO'RINMAYDI.
+   *
+   * `z-index: 0` konteynerni alohida joylashuv konteksti qiladi va
+   * 400-chi qatlamlar uning ICHIDA qoladi.
+   */
+  z-index: 0;
+}
+
+.leaflet-control-attribution {
+  @apply bg-card/80 text-[10px] text-muted-foreground;
+}
+
+.leaflet-control-attribution a {
+  @apply text-muted-foreground;
+}
+
+.leaflet-bar a {
+  @apply bg-card text-foreground;
+}
+
+/* Xarita nuqtasi — rang yo'nalishdan keladi (inline `style`). */
+.pin {
+  @apply flex h-7 w-7 items-center justify-center rounded-full
+    border-2 border-white shadow-lift;
+}
