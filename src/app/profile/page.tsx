@@ -161,12 +161,6 @@ export default function ProfilePage() {
             </Button>
           ) : null}
         </section>
-
-        <p className="px-2 pt-1 text-center text-[11px] leading-relaxed text-muted-foreground">
-          Ism va rasm Telegram hisobingizdan olinadi.
-          <br />
-          Ularni Telegram sozlamalaridan o&apos;zgartirishingiz mumkin.
-        </p>
       </main>
 
       {/* ── HUDUD TANLASH ─────────────────────────────────────── */}
