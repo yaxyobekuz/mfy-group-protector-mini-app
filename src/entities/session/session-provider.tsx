@@ -25,6 +25,7 @@ import type { CitizenProfile } from "@/shared/api/types";
 import { LoadingBlock } from "@/shared/ui/states";
 import { Button } from "@/shared/ui/button";
 import { closeApp } from "@/shared/lib/telegram";
+import { Onboarding } from "./onboarding";
 
 interface SessionValue {
   citizen: CitizenProfile;
@@ -120,6 +121,26 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
           </Button>
         </div>
       </div>
+    );
+  }
+
+  /**
+   * ⚠️ BIRINCHI KIRISH — HUDUD TANLANMAGUNCHA O'TKAZMAYDI. Tuman YOKI
+   * MFY bo'sh bo'lsa, onboarding ekrani chiqadi va `children`
+   * ko'rsatilmaydi. Shu tufayli hudud TEKSHIRUVI bitta joyda — har
+   * sahifada qayta yozilmaydi.
+   *
+   * ⚠️ IKKALASI HAM TALAB QILINADI (tuman VA MFY): murojaat aniq MFY ga
+   * yo'nalishi uchun. Saqlangach `refetch` sessiyani yangilaydi va bu
+   * shart bajarilib, ekran yopiladi.
+   */
+  const needsOnboarding = !query.data.districtId || !query.data.mahallaId;
+  if (needsOnboarding) {
+    return (
+      <Onboarding
+        firstName={query.data.firstName}
+        onDone={() => void query.refetch()}
+      />
     );
   }
 
