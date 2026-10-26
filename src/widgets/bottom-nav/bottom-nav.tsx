@@ -64,7 +64,11 @@ const Tab = ({ item, active }: { item: NavItem; active: boolean }) => {
         active ? "text-primary" : "text-muted-foreground",
       )}
     >
-      <Icon className={cn("h-[22px] w-[22px]", active && "stroke-[2.5]")} />
+      {/* ⚠️ `strokeWidth` 1.5 — ingichkaroq, zamonaviyroq ko'rinish.
+          Faol holat RANG va QALIN YORLIQ bilan ajratiladi (chiziq
+          qalinligi bilan emas), shuning uchun faol/nofaol ikonka bir
+          xil qalinlikda qoladi. */}
+      <Icon className="h-[22px] w-[22px]" strokeWidth={1.5} />
       <span className={cn("text-[10px] leading-none", active && "font-semibold")}>
         {item.label}
       </span>
