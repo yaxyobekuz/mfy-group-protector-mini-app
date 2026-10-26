@@ -68,8 +68,10 @@ export const APP_SCHEME = "vshtabi";
  * tufayli tizim brauzeriga chiqadi.
  */
 export const startTelegramLogin = (): void => {
+  // ⚠️ `bot_id` — RAQAM (yuqoridagi izoh). Nom yuborilsa Telegram
+  // `bot_id_invalid` beradi va sahifa ochilmaydi.
   const url =
-    `https://oauth.telegram.org/auth?bot_id=${encodeURIComponent(BOT_USERNAME)}` +
+    `https://oauth.telegram.org/auth?bot_id=${encodeURIComponent(BOT_ID)}` +
     `&origin=${encodeURIComponent(AUTH_ORIGIN)}` +
     `&return_to=${encodeURIComponent(`${AUTH_ORIGIN}/auth/callback`)}`;
 
