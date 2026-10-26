@@ -22,8 +22,8 @@ import {
   RotateCcw,
   Send,
 } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 import { useAddComment, useAppeal } from "@/features/appeals/api";
 import { fileUrl } from "@/shared/api/client";
@@ -44,10 +44,35 @@ const FLAGS = [
   { key: "isRepeatAppeal", label: "Takroriy murojaat", icon: RotateCcw },
 ] as const;
 
+/**
+ * ⚠️ MANZIL `/appeals/detail?id=…`, `/appeals/[id]` EMAS.
+ *
+ * Mustaqil ilova (APK) statik eksportda quriladi va u yerda
+ * dinamik segment (`[id]`) uchun Next `generateStaticParams()`
+ * talab qiladi — ya'ni BARCHA id'lar qurish paytida ma'lum
+ * bo'lishi kerak. Murojaat id'lari esa fuqaroga tegishli va
+ * qurish paytida mavjud emas.
+ *
+ * Sahifa allaqachon TO'LIQ mijoz tomonida ishlagani uchun
+ * (`useAppeal` so'rov yuboradi) id'ni manzil parametridan olish
+ * hech narsani o'zgartirmaydi.
+ */
 export default function AppealDetailPage() {
-  const params = useParams<{ id: string }>();
+  /**
+   * ⚠️ `Suspense` MAJBURIY: `useSearchParams` statik eksportda
+   * uni TALAB qiladi va usiz qurish xato bilan to'xtardi.
+   */
+  return (
+    <Suspense fallback={<LoadingBlock label="Yuklanmoqda…" />}>
+      <AppealDetailContent />
+    </Suspense>
+  );
+}
+
+function AppealDetailContent() {
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const id = params.id;
+  const id = searchParams.get("id") ?? "";
 
   const { data, isLoading, isError, refetch } = useAppeal(id);
   const comment = useAddComment(id);

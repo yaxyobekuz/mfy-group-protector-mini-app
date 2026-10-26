@@ -16,7 +16,7 @@
  * taassurot qoldirardi. Sabab serverdan keladi va o'zbek tilida.
  */
 
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 import { ApiError, api, loginOnce, tokens } from "@/shared/api/client";
@@ -24,8 +24,11 @@ import { queryKeys } from "@/shared/api/query-keys";
 import type { CitizenProfile } from "@/shared/api/types";
 import { LoadingBlock } from "@/shared/ui/states";
 import { Button } from "@/shared/ui/button";
+import { isNativeApp } from "@/shared/lib/native";
 import { closeApp } from "@/shared/lib/telegram";
 import { Onboarding } from "./onboarding";
+import { TelegramLoginScreen } from "./telegram-login";
+import { consumePendingAuth, listenForAuth } from "./telegram-login-flow";
 
 interface SessionValue {
   citizen: CitizenProfile;
@@ -48,8 +51,15 @@ export const useSession = (): SessionValue => {
 };
 
 export const SessionProvider = ({ children }: { children: ReactNode }) => {
+  const queryClient = useQueryClient();
   const [ready, setReady] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  /**
+   * ⚠️ MUSTAQIL ILOVADA KIRISH EKRANI KERAK: `initData` yo'q va
+   * fuqaro tugmani O'ZI bosadi. Mini-ilovada bu hech qachon
+   * `true` bo'lmaydi.
+   */
+  const [needsLogin, setNeedsLogin] = useState(false);
 
   /**
    * ⚠️ TOKEN BOR BO'LSA KIRISH TAKRORLANMAYDI: har ochilishda
@@ -65,23 +75,77 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
+      /**
+       * ⚠️ DEEP LINK AVVAL TEKSHIRILADI: ilova Telegram kirishidan
+       * keyin aynan shu manzil bilan ochiladi va token shundan
+       * olinadi. Keyinroq tekshirilsa, ekran bir lahza kirish
+       * tugmasini ko'rsatib, so'ng o'zgarardi.
+       */
+      const handled = await consumePendingAuth();
+      if (cancelled) return;
+
+      if (handled.status === "ok") {
+        setReady(true);
+        return;
+      }
+
+      if (handled.status === "error") {
+        setLoginError(handled.message);
+        setNeedsLogin(true);
+        setReady(true);
+        return;
+      }
+
       const ok = await loginOnce();
       if (cancelled) return;
 
-      if (!ok) setLoginError("Kirish amalga oshmadi");
+      // ⚠️ MUSTAQIL ILOVADA "KIRA OLMADI" XATO EMAS: fuqaro hali
+      // kirmagan va unga kirish ekrani ko'rsatiladi.
+      if (!ok) {
+        if (isNativeApp()) setNeedsLogin(true);
+        else setLoginError("Kirish amalga oshmadi");
+      }
       setReady(true);
     };
 
     void run();
+
+    /**
+     * ⚠️ ILOVA FONDAN QAYTGANDA ham kirish tugallanishi kerak:
+     * fuqaro Telegram'da tasdiqlaganda ilova fonda turadi va
+     * natija `appUrlOpen` bilan keladi. Usiz ekran kirish
+     * tugmasida qotib qolardi.
+     */
+    const stop = listenForAuth((result) => {
+      if (cancelled) return;
+
+      if (result.status === "ok") {
+        setLoginError(null);
+        setNeedsLogin(false);
+        setReady(true);
+        // ⚠️ QAYTA SO'RALADI: profil so'rovi kirishdan OLDIN
+        // 401 bilan tugagan bo'lishi mumkin va u o'zi qayta
+        // urinmaydi (`retry: 0`) — ekran kirgandan keyin ham
+        // xato holatida qolardi.
+        void queryClient.invalidateQueries({ queryKey: queryKeys.me() });
+      } else if (result.status === "error") {
+        setLoginError(result.message);
+      }
+    });
+
     return () => {
       cancelled = true;
+      stop();
     };
   }, []);
 
   const query = useQuery({
     queryKey: queryKeys.me(),
     queryFn: () => api.get<CitizenProfile>("/mobile/me"),
-    enabled: ready && !loginError,
+    // ⚠️ KIRMAGAN HOLATDA SO'RALMAYDI (`!needsLogin`): aks holda
+    // har ochilishda bitta 401 so'rov bekorga ketardi va
+    // `client.ts` uni "qayta kirish" deb talqin qilardi.
+    enabled: ready && !loginError && !needsLogin,
     // ⚠️ `retry: 0`: kirish xatosi (403 — hisob cheklangan) qayta
     // urinishdan tuzalmaydi va uch marta urinish sababni
     // ko'rsatishni 6 soniyaga kechiktirardi.
@@ -90,6 +154,15 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
   if (!ready || (query.isLoading && !query.data)) {
     return <LoadingBlock label="Ilova ochilmoqda…" />;
+  }
+
+  /**
+   * ⚠️ KIRISH EKRANI XATO EKRANIDAN OLDIN: mustaqil ilovada
+   * "hali kirmagan" holat XATO EMAS va unga "qaytadan urinish"
+   * tugmasini ko'rsatish fuqaroni chalg'itardi.
+   */
+  if (needsLogin) {
+    return <TelegramLoginScreen error={loginError} />;
   }
 
   if (loginError || query.isError || !query.data) {

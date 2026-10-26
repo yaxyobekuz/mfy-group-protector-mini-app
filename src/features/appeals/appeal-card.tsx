@@ -30,7 +30,7 @@ export const AppealCard = ({ appeal }: { appeal: AppealListItem }) => {
 
   return (
     <Link
-      href={`/appeals/${appeal.id}`}
+      href={`/appeals/detail?id=${appeal.id}`}
       onClick={() => haptic.tap()}
       className="card block p-4 transition active:scale-[0.99]"
     >

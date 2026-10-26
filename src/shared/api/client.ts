@@ -19,6 +19,7 @@
  * yuboradi va ularning har biri alohida kirish so'rovi yuborardi.
  */
 
+import { isNativeApp } from "../lib/native";
 import { getInitData, isInsideTelegram } from "../lib/telegram";
 
 /**
@@ -140,6 +141,15 @@ const doLogin = async (): Promise<boolean> => {
   try {
     const inside = isInsideTelegram();
 
+    /**
+     * ⚠️ MUSTAQIL ILOVADA (APK) AVTOMATIK KIRISH YO'Q: `initData`
+     * u yerda bo'lmaydi va dev yo'li ishlab chiqarishda yopiq.
+     * Fuqaro "Telegram orqali kirish" tugmasini O'ZI bosadi
+     * (`TelegramLoginScreen`), shuning uchun bu yerda jim
+     * `false` qaytariladi — xato emas, "hali kirmagan".
+     */
+    if (!inside && isNativeApp()) return false;
+
     const response = inside
       ? await fetch(`${API_URL}/mobile/auth/telegram`, {
           method: "POST",
@@ -174,6 +184,46 @@ export const loginOnce = (): Promise<boolean> => {
   });
 
   return loginPromise;
+};
+
+/**
+ * TELEGRAM LOGIN IMZOSINI TOKENGA ALMASHTIRADI (mustaqil ilova).
+ *
+ * ⚠️ MAYDONLAR O'ZGARTIRILMAY UZATILADI: imzo ular ustidan
+ * hisoblangan va bittasi tushib qolsa yoki qo'shilsa, server
+ * imzoni tasdiqlay olmasdi.
+ *
+ * ⚠️ XATO MATNI SERVERDAN: u o'zbek tilida va fuqaroga
+ * mo'ljallangan ("Hisobingiz vaqtincha cheklangan").
+ */
+export const loginWithTelegramPayload = async (
+  payload: Record<string, string>,
+): Promise<{ ok: true } | { ok: false; message: string }> => {
+  try {
+    const response = await fetch(`${API_URL}/mobile/auth/telegram-login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const text = await response.text();
+    const data = text ? (JSON.parse(text) as { token?: string; message?: string }) : null;
+
+    if (!response.ok || !data?.token) {
+      return {
+        ok: false,
+        message: data?.message ?? "Kirish amalga oshmadi — qaytadan urinib ko'ring",
+      };
+    }
+
+    tokens.save(data.token);
+    return { ok: true };
+  } catch {
+    return {
+      ok: false,
+      message: "Serverga ulanib bo'lmadi. Internetni tekshiring.",
+    };
+  }
 };
 
 // ═══════════════════════════════════════════════════════════════════

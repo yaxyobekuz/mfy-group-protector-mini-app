@@ -144,7 +144,7 @@ export const SuccessScreen = ({ appeal }: { appeal: CreatedAppeal }) => {
         <Button
           full
           size="lg"
-          onClick={() => router.replace(`/appeals/${appeal.id}`)}
+          onClick={() => router.replace(`/appeals/detail?id=${appeal.id}`)}
         >
           Murojaat holatini kuzatish
         </Button>

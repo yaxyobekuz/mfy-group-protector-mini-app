@@ -38,9 +38,41 @@ const DEV_ORIGINS = (process.env.ALLOWED_DEV_ORIGINS ?? "")
   .map((item) => item.trim().replace(/^https?:\/\//, ""))
   .filter(Boolean);
 
+/**
+ * MUSTAQIL ILOVA (APK/Capacitor) UCHUN STATIK EKSPORT.
+ *
+ * ⚠️ `BUILD_TARGET=native` BO'LGANDA ILOVA STATIK FAYLLARGA
+ * CHIQARILADI (`out/`), chunki APK ichida Node serveri YO'Q —
+ * sahifalar qurilmaning o'zida `file://` orqali ochiladi.
+ *
+ * ⚠️ PROKSI BU REJIMDA ISHLAMAYDI va shuning uchun
+ * `NEXT_PUBLIC_API_URL` TO'LIQ manzil bo'lishi SHART
+ * (`https://.../api`). Nisbiy `/api` qoldirilsa, so'rov
+ * qurilmaning o'ziga ketib, hech qachon serverga yetib
+ * bormasdi — xato esa faqat "Serverga ulanib bo'lmadi" degan
+ * umumiy xabarda ko'rinardi.
+ *
+ * ⚠️ `images.unoptimized`: Next rasm optimizatsiyasi SERVER
+ * talab qiladi va statik eksportda qurish shu sababdan
+ * yiqilardi.
+ */
+const IS_NATIVE = process.env.BUILD_TARGET === "native";
+
 const config: NextConfig = {
   reactStrictMode: true,
   typescript: { ignoreBuildErrors: false },
+
+  ...(IS_NATIVE
+    ? {
+        output: "export" as const,
+        images: { unoptimized: true },
+        // ⚠️ `file://` DA KATALOG MANZILI ISHLAMAYDI: `/news`
+        // o'rniga `/news.html` kerak bo'lardi. `trailingSlash`
+        // bilan Next har sahifani `news/index.html` qilib
+        // chiqaradi va WebView uni to'g'ri topadi.
+        trailingSlash: true,
+      }
+    : {}),
 
   ...(DEV_ORIGINS.length > 0 ? { allowedDevOrigins: DEV_ORIGINS } : {}),
 
