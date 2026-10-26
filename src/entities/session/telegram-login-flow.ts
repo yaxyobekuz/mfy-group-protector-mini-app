@@ -86,7 +86,47 @@ export const startTelegramLogin = (): void => {
  * tasdiqlay olmasdi.
  */
 export const parseAuthParams = (search: string): Record<string, string> | null => {
-  const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+  const raw = search.startsWith("?") || search.startsWith("#") ? search.slice(1) : search;
+
+  /**
+   * ⚠️ TELEGRAM IKKI KO'RINISHDA QAYTARADI:
+   *
+   *   1) `tgAuthResult=<base64 JSON>`  ← odatdagi yo'l
+   *   2) `id=…&hash=…`                 ← ba'zi widget versiyalari
+   *
+   * Birinchisi `callback` sahifasida ochib berilsa ham, deep link
+   * boshqa yo'l bilan (masalan, brauzer tarixidan) kelishi mumkin
+   * — shuning uchun bu yerda ham qo'llab-quvvatlanadi.
+   */
+  const marker = "tgAuthResult=";
+  const at = raw.indexOf(marker);
+
+  if (at !== -1) {
+    try {
+      let encoded = raw.slice(at + marker.length);
+      const amp = encoded.indexOf("&");
+      if (amp !== -1) encoded = encoded.slice(0, amp);
+
+      // ⚠️ `base64url` → `base64`: `-`/`_` bilan kelsa `atob`
+      // yiqilardi.
+      let b64 = decodeURIComponent(encoded).replace(/-/g, "+").replace(/_/g, "/");
+      while (b64.length % 4) b64 += "=";
+
+      const data = JSON.parse(atob(b64)) as Record<string, unknown>;
+      const payload: Record<string, string> = {};
+
+      for (const [key, value] of Object.entries(data)) {
+        if (value === null || value === undefined) continue;
+        payload[key] = String(value);
+      }
+
+      return payload.hash ? payload : null;
+    } catch {
+      return null;
+    }
+  }
+
+  const params = new URLSearchParams(raw);
   const payload: Record<string, string> = {};
 
   for (const [key, value] of params.entries()) {
@@ -111,6 +151,23 @@ export const parseAuthParams = (search: string): Record<string, string> | null =
  * ⚠️ `replaceState`, `pushState` EMAS: orqaga tugmasi fuqaroni
  * kirish manziliga qaytarmasligi kerak.
  */
+/**
+ * Deep link manzilidan ma'lumot qismini oladi.
+ *
+ * ⚠️ `search` VA `hash` IKKALASI HAM QARALADI: Telegram
+ * `tgAuthResult` ni FRAGMENTDA qaytaradi va faqat `search`
+ * o'qilsa, kirish jimgina ishlamay qolardi.
+ */
+const urlPayload = (url: string): string => {
+  try {
+    const parsed = new URL(url);
+    // Qaysi biri to'lgan bo'lsa — o'sha.
+    return parsed.search.length > 1 ? parsed.search : parsed.hash;
+  } catch {
+    return "";
+  }
+};
+
 export type AuthResult =
   | { status: "none" }
   | { status: "ok" }
@@ -158,7 +215,7 @@ export const consumePendingAuth = async (): Promise<AuthResult> => {
       const { App } = await import("@capacitor/app");
       const launch = await App.getLaunchUrl();
       if (launch?.url) {
-        payload = parseAuthParams(new URL(launch.url).search);
+        payload = parseAuthParams(urlPayload(launch.url));
         if (payload) return exchange(payload);
       }
     } catch {
@@ -188,7 +245,7 @@ export const listenForAuth = (handler: (result: AuthResult) => void): (() => voi
     try {
       const { App } = await import("@capacitor/app");
       const listener = await App.addListener("appUrlOpen", (event) => {
-        const payload = parseAuthParams(new URL(event.url).search);
+        const payload = parseAuthParams(urlPayload(event.url));
         if (payload) void exchange(payload).then(handler);
       });
 
