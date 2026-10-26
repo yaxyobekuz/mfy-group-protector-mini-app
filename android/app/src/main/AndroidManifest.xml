@@ -36,11 +36,24 @@
                 usiz deep link ilovaning IKKINCHI nusxasini
                 ochardi va birinchisidagi holat yo'qolardi.
             -->
+            <!--
+                ⚠️ `android:host` BERILMAYDI — FAQAT SXEMA.
+
+                `host="auth"` yozilganda filtr `vshtabi://auth`
+                ga QAT'IY bog'lanib qoladi va manzil biroz
+                boshqacha kelsa (`vshtabi:///auth`,
+                `vshtabi://auth/`, yoki fragment bilan) Android
+                mos ilova TOPA OLMAY, havola umuman ochilmasdi —
+                fuqaro esa brauzerda qotib qolardi.
+
+                Sxemaning o'zi bizga xos (`vshtabi`), ya'ni
+                boshqa ilova bu havolani da'vo qila olmaydi.
+            -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="vshtabi" android:host="auth" />
+                <data android:scheme="vshtabi" />
             </intent-filter>
 
         </activity>
