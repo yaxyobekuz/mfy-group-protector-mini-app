@@ -21,6 +21,7 @@ import type { Category } from "@/shared/api/types";
 import { categoryColor, categoryIcon } from "@/shared/config/icons";
 import { slaLabel } from "@/shared/config/labels";
 import { cn } from "@/shared/lib/cn";
+import { useT, type Translate } from "@/shared/lib/i18n";
 import { haptic } from "@/shared/lib/telegram";
 import { Field } from "@/shared/ui/field";
 import { CardSkeleton, ErrorState } from "@/shared/ui/states";
@@ -36,10 +37,12 @@ const CategoryCard = ({
   category,
   selected,
   onSelect,
+  t,
 }: {
   category: Category;
   selected: boolean;
   onSelect: () => void;
+  t: Translate;
 }) => {
   const Icon = categoryIcon(category.icon);
   const color = categoryColor(category.color);
@@ -83,7 +86,7 @@ const CategoryCard = ({
           {/* ⚠️ MUDDAT SHU YERDA KO'RSATILADI: fuqaro yo'nalishni
               tanlayotganda "qachon javob olaman" degan savolga
               javob kerak bo'ladi, oxirgi qadamda emas. */}
-          Javob: {slaLabel(category.slaHours)}
+          {t("category.sla", { value: slaLabel(category.slaHours, t) })}
         </span>
       </span>
     </button>
@@ -93,6 +96,7 @@ const CategoryCard = ({
 export const StepCategory = ({ value, onChange }: Props) => {
   const { data, isLoading, isError, refetch } = useCategories();
   const [search, setSearch] = useState("");
+  const t = useT();
 
   const filtered = useMemo(() => {
     if (!data) return [];
@@ -124,7 +128,7 @@ export const StepCategory = ({ value, onChange }: Props) => {
     <div className="space-y-4">
       {data.length > SEARCH_THRESHOLD ? (
         <Field
-          placeholder="Muammo turini qidirish…"
+          placeholder={t("category.search")}
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           icon={<Search className="h-4 w-4" />}
@@ -134,7 +138,7 @@ export const StepCategory = ({ value, onChange }: Props) => {
 
       {filtered.length === 0 ? (
         <p className="py-10 text-center text-sm text-muted-foreground">
-          Mos yo&apos;nalish topilmadi
+          {t("category.notFound")}
         </p>
       ) : (
         /* ⚠️ UCH USTUN: mockup'dagi tartib. Ikki ustun bo'lsa
@@ -147,6 +151,7 @@ export const StepCategory = ({ value, onChange }: Props) => {
               category={category}
               selected={value === category.id}
               onSelect={() => onChange(category.id)}
+              t={t}
             />
           ))}
         </div>

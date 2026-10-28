@@ -17,6 +17,18 @@
  *   oy          →  Yanvar, 2026
  *   vaqt        →  14:30
  *
+ * ── TO'RT TIL ─────────────────────────────────────────────────────────
+ *
+ * ⚠️ TUZILMA O'ZGARMAYDI, FAQAT OY NOMI ALMASHADI: "21-may, 2025"
+ * tartibi (kun → oy → yil) to'rtala tilda ham saqlanadi. Sabab —
+ * bu format server va panel bilan KO'ZGU bo'lishi kerak; tilga
+ * qarab tartibni o'zgartirish ("May 21, 2025") bitta murojaatni
+ * ikki joyda boshqacha ko'rsatardi.
+ *
+ * ⚠️ `Intl` BARIBIR ISHLATILMAYDI: til endi ilovaning O'Z
+ * tanlovi va muhit sozlamasiga bog'liq emas — pastdagi taqiq
+ * kuchida qoladi.
+ *
  * ── TAQIQLANGAN ───────────────────────────────────────────────────────
  *
  * ⚠️ `toLocaleDateString()`, `toLocaleString()`, `Intl.DateTimeFormat`
@@ -32,25 +44,104 @@
  * uchun. Ekranga chiqmaydi — shu uchun `toInputDate` alohida nomda.
  */
 
-const MONTHS_UZ = [
-  "yanvar",
-  "fevral",
-  "mart",
-  "aprel",
-  "may",
-  "iyun",
-  "iyul",
-  "avgust",
-  // ⚠️ IMLO QAT'IY: "sentabr"/"oktabr" — "sentyabr"/"oktyabr" EMAS.
-  "sentabr",
-  "oktabr",
-  "noyabr",
-  "dekabr",
-] as const;
+import { translate } from "@/shared/config/dictionary";
+import { DEFAULT_LOCALE, type Locale } from "@/shared/config/locales";
 
-const MONTHS_UZ_CAP = MONTHS_UZ.map(
-  (month) => month.charAt(0).toUpperCase() + month.slice(1),
-);
+const MONTHS: Record<Locale, readonly string[]> = {
+  uz: [
+    "yanvar",
+    "fevral",
+    "mart",
+    "aprel",
+    "may",
+    "iyun",
+    "iyul",
+    "avgust",
+    // ⚠️ IMLO QAT'IY: "sentabr"/"oktabr" — "sentyabr"/"oktyabr" EMAS.
+    "sentabr",
+    "oktabr",
+    "noyabr",
+    "dekabr",
+  ],
+  uzc: [
+    "январ",
+    "феврал",
+    "март",
+    "апрел",
+    "май",
+    "июн",
+    "июл",
+    "август",
+    "сентабр",
+    "октабр",
+    "ноябр",
+    "декабр",
+  ],
+  /**
+   * ⚠️ RUSCHA OYLAR — QARATQICH KELISHIGIDA ("21 мая", "21 май"
+   * emas): rus tilida sana aynan shu shaklda o'qiladi va bosh
+   * kelishikdagi ro'yxat ("май") sanada xato ko'rinardi.
+   */
+  ru: [
+    "января",
+    "февраля",
+    "марта",
+    "апреля",
+    "мая",
+    "июня",
+    "июля",
+    "августа",
+    "сентября",
+    "октября",
+    "ноября",
+    "декабря",
+  ],
+  en: [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ],
+};
+
+/**
+ * OY NOMI — BOSH HARF BILAN ("Yanvar, 2026").
+ *
+ * ⚠️ RUS TILIDA BOSHQA RO'YXAT: sanadagi "января" qaratqichda,
+ * yolg'iz oy nomi esa bosh kelishikda bo'lishi kerak ("Январь,
+ * 2026"). Birinchi harfni katta qilish bilan "Января, 2026"
+ * chiqib, xato bo'lardi.
+ */
+const MONTHS_ALONE: Record<Locale, readonly string[]> = {
+  uz: MONTHS.uz,
+  uzc: MONTHS.uzc,
+  ru: [
+    "Январь",
+    "Февраль",
+    "Март",
+    "Апрель",
+    "Май",
+    "Июнь",
+    "Июль",
+    "Август",
+    "Сентябрь",
+    "Октябрь",
+    "Ноябрь",
+    "Декабрь",
+  ],
+  en: MONTHS.en,
+};
+
+const capitalize = (value: string): string =>
+  value.charAt(0).toUpperCase() + value.slice(1);
 
 /** Bo'sh yoki yaroqsiz qiymat — `Invalid Date` yoki bo'sh satr EMAS. */
 const EMPTY = "—";
@@ -82,14 +173,25 @@ const toTashkent = (date: Date): Date =>
 
 const pad = (value: number): string => String(value).padStart(2, "0");
 
-/** "21-may, 2025" */
-export const formatDateUz = (value: DateInput): string => {
+/**
+ * "21-may, 2025" / "21 мая, 2025" / "21 May, 2025"
+ *
+ * ⚠️ DEFIS FAQAT O'ZBEK TILIDA: "21-may" o'zbekcha yozuv qoidasi,
+ * rus va ingliz tilida esa "21-мая" xato ko'rinardi.
+ */
+export const formatDateUz = (
+  value: DateInput,
+  locale: Locale = DEFAULT_LOCALE,
+): string => {
   const date = toDate(value);
   if (!date) return EMPTY;
 
   const tz = toTashkent(date);
+  const month = MONTHS[locale][tz.getUTCMonth()]!;
+  const separator = locale === "uz" || locale === "uzc" ? "-" : " ";
+
   // ⚠️ Kun raqami NOLDAN BOSHLANMAYDI: "3-yanvar", "03-yanvar" emas.
-  return `${tz.getUTCDate()}-${MONTHS_UZ[tz.getUTCMonth()]}, ${tz.getUTCFullYear()}`;
+  return `${tz.getUTCDate()}${separator}${month}, ${tz.getUTCFullYear()}`;
 };
 
 /** "14:30" */
@@ -102,20 +204,26 @@ export const formatTimeUz = (value: DateInput): string => {
 };
 
 /** "21-may, 2025 14:30" */
-export const formatDateTimeUz = (value: DateInput): string => {
+export const formatDateTimeUz = (
+  value: DateInput,
+  locale: Locale = DEFAULT_LOCALE,
+): string => {
   const date = toDate(value);
   if (!date) return EMPTY;
 
-  return `${formatDateUz(date)} ${formatTimeUz(date)}`;
+  return `${formatDateUz(date, locale)} ${formatTimeUz(date)}`;
 };
 
 /** "Yanvar, 2026" */
-export const formatMonthUz = (value: DateInput): string => {
+export const formatMonthUz = (
+  value: DateInput,
+  locale: Locale = DEFAULT_LOCALE,
+): string => {
   const date = toDate(value);
   if (!date) return EMPTY;
 
   const tz = toTashkent(date);
-  return `${MONTHS_UZ_CAP[tz.getUTCMonth()]}, ${tz.getUTCFullYear()}`;
+  return `${capitalize(MONTHS_ALONE[locale][tz.getUTCMonth()]!)}, ${tz.getUTCFullYear()}`;
 };
 
 /**
@@ -128,23 +236,26 @@ export const formatMonthUz = (value: DateInput): string => {
  * ⚠️ `Intl.RelativeTimeFormat` ISHLATILMAYDI — u ham locale'ga
  * bog'liq va o'zbek tilida ba'zi muhitlarda ingliz tilida chiqardi.
  */
-export const formatRelativeUz = (value: DateInput): string => {
+export const formatRelativeUz = (
+  value: DateInput,
+  locale: Locale = DEFAULT_LOCALE,
+): string => {
   const date = toDate(value);
   if (!date) return EMPTY;
 
   const diffMs = Date.now() - date.getTime();
 
   // Kelajakdagi sana (muddat) — nisbiy ko'rsatilmaydi.
-  if (diffMs < 0) return formatDateTimeUz(date);
+  if (diffMs < 0) return formatDateTimeUz(date, locale);
 
   const minutes = Math.floor(diffMs / 60_000);
-  if (minutes < 1) return "hozir";
-  if (minutes < 60) return `${minutes} daqiqa oldin`;
+  if (minutes < 1) return translate(locale, "time.now");
+  if (minutes < 60) return translate(locale, "time.minutesAgo", { count: minutes });
 
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} soat oldin`;
+  if (hours < 24) return translate(locale, "time.hoursAgo", { count: hours });
 
-  return formatDateTimeUz(date);
+  return formatDateTimeUz(date, locale);
 };
 
 /**

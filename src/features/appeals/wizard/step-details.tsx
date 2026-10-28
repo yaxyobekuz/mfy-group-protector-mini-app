@@ -18,6 +18,7 @@ import { AlertTriangle, CalendarClock, History, RotateCcw } from "lucide-react";
 
 import { BODY_MIN, BODY_SOFT_MAX, BODY_MAX } from "@/shared/config/limits";
 import { Textarea, Toggle } from "@/shared/ui/field";
+import { useT } from "@/shared/lib/i18n";
 
 interface Props {
   body: string;
@@ -42,12 +43,13 @@ export const StepDetails = ({
   occurredAt,
   onChange,
 }: Props) => {
+  const t = useT();
   const tooShort = body.trim().length > 0 && body.trim().length < BODY_MIN;
 
   return (
     <div className="space-y-5">
       <Textarea
-        placeholder="Muammo haqida qisqacha yozing…"
+        placeholder={t("details.placeholder")}
         value={body}
         // ⚠️ `maxLength` SERVER CHEGARASIDA (2000), sanoqchi esa
         // 500 da (`limits.ts` izohi): yozilgan matnni kesib
@@ -57,8 +59,8 @@ export const StepDetails = ({
         onChange={(event) => onChange({ body: event.target.value })}
         hint={
           tooShort
-            ? `Kamida ${BODY_MIN} ta belgi yozing`
-            : "Nima bo'lgani va qachondan beri davom etayotgani"
+            ? t("details.tooShort", { count: BODY_MIN })
+            : t("details.hint")
         }
         className="min-h-[9rem]"
       />
@@ -66,28 +68,30 @@ export const StepDetails = ({
       {/* ── QO'SHIMCHA BELGILAR ───────────────────────────────── */}
       <section className="space-y-2.5">
         <h3 className="text-sm font-semibold">
-          Qo&apos;shimcha ma&apos;lumot
-          <span className="ml-1.5 font-normal text-muted-foreground">(ixtiyoriy)</span>
+          {t("details.extra")}
+          <span className="ml-1.5 font-normal text-muted-foreground">
+            ({t("common.optional").toLowerCase()})
+          </span>
         </h3>
 
         <Toggle
-          label="Bu muammo xavfli"
-          hint="Insonlar hayoti uchun xavf mavjud"
+          label={t("details.hazard")}
+          hint={t("details.hazardHint")}
           icon={<AlertTriangle className="h-5 w-5" />}
           checked={isHazard}
           onChange={(next) => onChange({ isHazard: next })}
         />
 
         <Toggle
-          label="Ko'p vaqtdan beri davom etmoqda"
+          label={t("details.longStanding")}
           icon={<History className="h-5 w-5" />}
           checked={isLongStanding}
           onChange={(next) => onChange({ isLongStanding: next })}
         />
 
         <Toggle
-          label="Avval murojaat qilganman"
-          hint="Shu muammo bo'yicha javob olmaganman"
+          label={t("details.repeat")}
+          hint={t("details.repeatHint")}
           icon={<RotateCcw className="h-5 w-5" />}
           checked={isRepeatAppeal}
           onChange={(next) => onChange({ isRepeatAppeal: next })}
@@ -98,7 +102,7 @@ export const StepDetails = ({
       <label className="block space-y-1.5">
         <span className="flex items-center gap-1.5 text-sm font-medium">
           <CalendarClock className="h-4 w-4 text-muted-foreground" />
-          Taxminiy sana va vaqt
+          {t("details.occurredAt")}
         </span>
 
         {/*
@@ -121,7 +125,7 @@ export const StepDetails = ({
         />
 
         <span className="block text-xs text-muted-foreground">
-          Bo&apos;sh qoldirsangiz — murojaat yuborilgan vaqt olinadi
+          {t("details.occurredAtHint")}
         </span>
       </label>
     </div>

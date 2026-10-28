@@ -28,8 +28,10 @@ import { Suspense, useEffect, useState } from "react";
 import { useAddComment, useAppeal } from "@/features/appeals/api";
 import { fileUrl } from "@/shared/api/client";
 import { categoryColor, categoryIcon } from "@/shared/config/icons";
-import { APPEAL_STATUS, slaLabel } from "@/shared/config/labels";
+import { APPEAL_STATUS } from "@/shared/config/labels";
 import { cn } from "@/shared/lib/cn";
+import { useLocale } from "@/shared/lib/i18n";
+import type { MessageKey } from "@/shared/config/dictionary";
 import { formatDateTimeUz, formatRelativeUz } from "@/shared/lib/date";
 import { haptic, showBackButton } from "@/shared/lib/telegram";
 import { Button } from "@/shared/ui/button";
@@ -39,10 +41,14 @@ import { ErrorState, LoadingBlock } from "@/shared/ui/states";
 import { MapView } from "@/widgets/map/map-view";
 
 const FLAGS = [
-  { key: "isHazard", label: "Xavfli holat", icon: AlertTriangle },
-  { key: "isLongStanding", label: "Uzoq davom etmoqda", icon: History },
-  { key: "isRepeatAppeal", label: "Takroriy murojaat", icon: RotateCcw },
-] as const;
+  { key: "isHazard", label: "appeal.flag.hazard", icon: AlertTriangle },
+  { key: "isLongStanding", label: "appeal.flag.longStanding", icon: History },
+  { key: "isRepeatAppeal", label: "appeal.flag.repeat", icon: RotateCcw },
+] as const satisfies readonly {
+  key: string;
+  label: MessageKey;
+  icon: typeof AlertTriangle;
+}[];
 
 /**
  * ⚠️ MANZIL `/appeals/detail?id=…`, `/appeals/[id]` EMAS.
@@ -63,7 +69,7 @@ export default function AppealDetailPage() {
    * uni TALAB qiladi va usiz qurish xato bilan to'xtardi.
    */
   return (
-    <Suspense fallback={<LoadingBlock label="Yuklanmoqda…" />}>
+    <Suspense fallback={<LoadingBlock />}>
       <AppealDetailContent />
     </Suspense>
   );
@@ -72,6 +78,7 @@ export default function AppealDetailPage() {
 function AppealDetailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { locale, t } = useLocale();
   const id = searchParams.get("id") ?? "";
 
   const { data, isLoading, isError, refetch } = useAppeal(id);
@@ -108,7 +115,7 @@ function AppealDetailContent() {
               status.className,
             )}
           >
-            {status.label}
+            {t(status.key)}
           </span>
         </div>
       </header>
@@ -123,14 +130,14 @@ function AppealDetailContent() {
             )}
           >
             <h2 className="text-[13px] font-semibold">
-              {data.status === "resolved" ? "Javob" : "Rad etish sababi"}
+              {data.status === "resolved" ? t("appeal.answer") : t("appeal.rejectReason")}
             </h2>
             <p className="mt-1.5 whitespace-pre-wrap text-[14px] leading-relaxed">
               {data.resolution}
             </p>
             {data.resolvedAt ? (
               <p className="mt-2 text-[11px] text-muted-foreground">
-                {formatDateTimeUz(data.resolvedAt)}
+                {formatDateTimeUz(data.resolvedAt, locale)}
               </p>
             ) : null}
           </section>
@@ -234,7 +241,7 @@ function AppealDetailContent() {
                     className="flex items-center gap-1 rounded-full bg-warning/15 px-2.5 py-1 text-[11px] font-medium text-warning"
                   >
                     <FlagIcon className="h-3 w-3" />
-                    {flag.label}
+                    {t(flag.label)}
                   </span>
                 );
               })}
@@ -259,12 +266,12 @@ function AppealDetailContent() {
 
             <p className="flex items-center gap-2 text-muted-foreground">
               <Building2 className="h-3.5 w-3.5 shrink-0" />
-              {data.category.orgName ?? "Viloyat shtabi"}
+              {data.category.orgName ?? t("appeal.defaultOrg")}
             </p>
 
             <p className="flex items-center gap-2 text-muted-foreground">
               <Clock className="h-3.5 w-3.5 shrink-0" />
-              Yuborilgan: {formatDateTimeUz(data.createdAt)}
+              {t("appeal.sentAt")}: {formatDateTimeUz(data.createdAt, locale)}
             </p>
 
             {/* ⚠️ MUDDAT FAQAT OCHIQ MUROJAATDA: yopilganida u
@@ -272,7 +279,7 @@ function AppealDetailContent() {
             {!closed && data.dueAt ? (
               <p className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="h-3.5 w-3.5 shrink-0" />
-                Javob muddati: {formatDateTimeUz(data.dueAt)}
+                {t("appeal.dueAt")}: {formatDateTimeUz(data.dueAt, locale)}
               </p>
             ) : null}
           </div>
@@ -281,7 +288,7 @@ function AppealDetailContent() {
         {/* ── YOZISHMA ──────────────────────────────────────── */}
         {data.comments.length > 0 ? (
           <section className="space-y-2">
-            <h2 className="px-1 text-[13px] font-semibold">Yozishma</h2>
+            <h2 className="px-1 text-[13px] font-semibold">{t("appeal.chat")}</h2>
 
             {data.comments.map((item) => (
               <div
@@ -310,7 +317,7 @@ function AppealDetailContent() {
                     item.mine ? "opacity-70" : "text-muted-foreground",
                   )}
                 >
-                  {formatRelativeUz(item.createdAt)}
+                  {formatRelativeUz(item.createdAt, locale)}
                 </p>
               </div>
             ))}
@@ -331,7 +338,7 @@ function AppealDetailContent() {
               icon={<MessageSquarePlus className="h-[18px] w-[18px]" />}
               onClick={() => setCommenting(true)}
             >
-              Qo&apos;shimcha ma&apos;lumot yuborish
+              {t("appeal.addInfo")}
             </Button>
           </div>
         </div>
@@ -340,14 +347,14 @@ function AppealDetailContent() {
       <Sheet
         open={commenting}
         onClose={() => setCommenting(false)}
-        title="Qo'shimcha ma'lumot"
+        title={t("appeal.addInfoTitle")}
       >
         <Textarea
-          placeholder="Qo'shimcha nima aytmoqchisiz?"
+          placeholder={t("appeal.addInfoPlaceholder")}
           value={draft}
           maxLength={1000}
           onChange={(event) => setDraft(event.target.value)}
-          hint="Bu matn murojaat yozishmasiga qo'shiladi"
+          hint={t("appeal.addInfoHint")}
         />
 
         <Button
@@ -365,7 +372,7 @@ function AppealDetailContent() {
             });
           }}
         >
-          Yuborish
+          {t("common.send")}
         </Button>
       </Sheet>
 
@@ -373,7 +380,7 @@ function AppealDetailContent() {
       {photo ? (
         <button
           type="button"
-          aria-label="Yopish"
+          aria-label={t("common.close")}
           onClick={() => setPhoto(null)}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
         >

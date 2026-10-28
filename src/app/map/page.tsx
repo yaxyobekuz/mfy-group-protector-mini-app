@@ -22,17 +22,19 @@ import type { AppealStatus } from "@/shared/api/types";
 import { categoryColor, categoryIcon } from "@/shared/config/icons";
 import { APPEAL_STATUS } from "@/shared/config/labels";
 import { cn } from "@/shared/lib/cn";
+import { useLocale } from "@/shared/lib/i18n";
+import type { MessageKey } from "@/shared/config/dictionary";
 import { formatDateUz } from "@/shared/lib/date";
 import { haptic } from "@/shared/lib/telegram";
 import { Sheet } from "@/shared/ui/sheet";
 import { BottomNav } from "@/widgets/bottom-nav/bottom-nav";
 import { MapView, type MapMarker } from "@/widgets/map/map-view";
 
-const STATUS_FILTERS: { key: AppealStatus | "all"; label: string }[] = [
-  { key: "all", label: "Barchasi" },
-  { key: "new", label: "Yangi" },
-  { key: "in_progress", label: "Jarayonda" },
-  { key: "resolved", label: "Hal qilindi" },
+const STATUS_FILTERS: { key: AppealStatus | "all"; label: MessageKey }[] = [
+  { key: "all", label: "map.all" },
+  { key: "new", label: "map.statusNew" },
+  { key: "in_progress", label: "appeals.tab.open" },
+  { key: "resolved", label: "status.resolved" },
 ];
 
 export default function MapPage() {
@@ -40,6 +42,7 @@ export default function MapPage() {
   const [status, setStatus] = useState<AppealStatus | undefined>();
   const [filtering, setFiltering] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
+  const { locale, t } = useLocale();
 
   const categories = useCategories();
   const points = useMapPoints({ categoryId, status });
@@ -84,8 +87,8 @@ export default function MapPage() {
         <div className="pointer-events-auto mx-auto flex max-w-lg items-center justify-between gap-2">
           <span className="rounded-xl bg-card/95 px-3 py-2 text-[12px] font-semibold shadow-card backdrop-blur">
             {points.isLoading
-              ? "Yuklanmoqda…"
-              : `${markers.length} ta nuqta`}
+              ? t("common.loading")
+              : t("map.points", { count: markers.length })}
           </span>
 
           <button
@@ -132,15 +135,15 @@ export default function MapPage() {
                     APPEAL_STATUS[active.status].className,
                   )}
                 >
-                  {APPEAL_STATUS[active.status].label}
+                  {t(APPEAL_STATUS[active.status].key)}
                 </span>
-                {formatDateUz(active.createdAt)}
+                {formatDateUz(active.createdAt, locale)}
               </span>
             </span>
 
             <button
               type="button"
-              aria-label="Yopish"
+              aria-label={t("common.close")}
               onClick={() => setSelected(null)}
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground"
             >
@@ -151,10 +154,10 @@ export default function MapPage() {
       ) : null}
 
       {/* ── FILTR OYNASI ──────────────────────────────────────── */}
-      <Sheet open={filtering} onClose={() => setFiltering(false)} title="Filtr" tall>
+      <Sheet open={filtering} onClose={() => setFiltering(false)} title={t("map.filter")} tall>
         <div className="space-y-5">
           <section>
-            <h3 className="mb-2 text-[13px] font-semibold">Holat</h3>
+            <h3 className="mb-2 text-[13px] font-semibold">{t("map.status")}</h3>
             <div className="flex flex-wrap gap-2">
               {STATUS_FILTERS.map((item) => {
                 const isActive =
@@ -175,7 +178,7 @@ export default function MapPage() {
                         : "bg-secondary text-muted-foreground",
                     )}
                   >
-                    {item.label}
+                    {t(item.label)}
                   </button>
                 );
               })}
@@ -183,7 +186,7 @@ export default function MapPage() {
           </section>
 
           <section>
-            <h3 className="mb-2 text-[13px] font-semibold">Yo&apos;nalish</h3>
+            <h3 className="mb-2 text-[13px] font-semibold">{t("map.category")}</h3>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
@@ -198,7 +201,7 @@ export default function MapPage() {
                     : "bg-secondary text-muted-foreground",
                 )}
               >
-                Barchasi
+                {t("map.all")}
               </button>
 
               {(categories.data ?? []).map((category) => (

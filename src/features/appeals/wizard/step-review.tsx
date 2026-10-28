@@ -27,6 +27,7 @@ import type { Category, AnalysisResponse } from "@/shared/api/types";
 import { categoryColor, categoryIcon } from "@/shared/config/icons";
 import { slaLabel } from "@/shared/config/labels";
 import { cn } from "@/shared/lib/cn";
+import { useT } from "@/shared/lib/i18n";
 import { haptic } from "@/shared/lib/telegram";
 import { Spinner } from "@/shared/ui/states";
 import type { WizardFile } from "./wizard-state";
@@ -68,6 +69,7 @@ export const StepReview = ({
   analyzing,
   onAcceptSuggestion,
 }: Props) => {
+  const t = useT();
   const Icon = categoryIcon(category?.icon);
   const color = categoryColor(category?.color);
 
@@ -87,14 +89,14 @@ export const StepReview = ({
           </span>
           <span>
             <span className="block text-[13px] font-semibold leading-tight">
-              Tahlil natijasi
+              {t("review.result")}
             </span>
             <span className="block text-[11px] text-muted-foreground">
               {analyzing
-                ? "Tekshirilmoqda…"
+                ? t("review.checking")
                 : suggestion
-                  ? "Muammo turi avtomatik aniqlandi"
-                  : "Siz tanlagan yo'nalish qo'llanadi"}
+                  ? t("review.detected")
+                  : t("review.yourChoice")}
             </span>
           </span>
 
@@ -151,20 +153,20 @@ export const StepReview = ({
 
           <Row
             icon={<MapPin className="h-4 w-4" />}
-            label="Joylashuv"
-            value={address.trim() || "Ko'rsatilmagan"}
+            label={t("review.place")}
+            value={address.trim() || t("review.notSet")}
           />
 
           <Row
             icon={<Building2 className="h-4 w-4" />}
-            label="Mas'ul tashkilot"
-            value={category?.orgName ?? "Viloyat shtabi"}
+            label={t("review.org")}
+            value={category?.orgName ?? t("appeal.defaultOrg")}
           />
 
           <Row
             icon={<Clock className="h-4 w-4" />}
-            label="Taxminiy javob muddati"
-            value={category ? slaLabel(category.slaHours) : "—"}
+            label={t("review.sla")}
+            value={category ? slaLabel(category.slaHours, t) : "—"}
           />
         </div>
       </section>
@@ -172,11 +174,15 @@ export const StepReview = ({
       {/* ── BOSHQA YO'NALISH TAKLIFI ──────────────────────────── */}
       {differs && suggestion ? (
         <section className="rounded-2xl border border-primary/30 bg-accent/40 p-4">
+          {/* ⚠️ BUTUN GAP BITTA KALITDA: yo'nalish nomi gapning
+              O'RTASIDA turadi va tilga qarab uning o'rni
+              o'zgaradi — matnni bo'lakka bo'lib ulash rus va
+              ingliz tilida noto'g'ri tartib berardi. */}
           <p className="text-[13px] leading-relaxed">
-            Tizim bu murojaat{" "}
-            <strong className="font-semibold">{suggestion.categoryName}</strong>{" "}
-            yo&apos;nalishiga ko&apos;proq mos deb hisoblaydi (
-            <span className="tabular-nums">{suggestion.confidence}%</span>).
+            {t("review.suggestion", {
+              category: suggestion.categoryName,
+              confidence: suggestion.confidence,
+            })}
           </p>
 
           <div className="mt-3 flex gap-2">
@@ -192,11 +198,11 @@ export const StepReview = ({
               )}
             >
               <Check className="h-4 w-4" />
-              Taklifni qabul qilish
+              {t("review.accept")}
             </button>
 
             <span className="flex-1 self-center text-center text-[12px] text-muted-foreground">
-              yoki o&apos;z tanlovingizda qoling
+              {t("review.keep")}
             </span>
           </div>
         </section>

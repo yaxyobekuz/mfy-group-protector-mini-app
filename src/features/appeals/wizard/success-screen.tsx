@@ -22,11 +22,13 @@ import type { CreatedAppeal } from "@/shared/api/types";
 import { slaLabel } from "@/shared/config/labels";
 import { formatDateTimeUz } from "@/shared/lib/date";
 import { haptic } from "@/shared/lib/telegram";
+import { useLocale } from "@/shared/lib/i18n";
 import { Button } from "@/shared/ui/button";
 
 export const SuccessScreen = ({ appeal }: { appeal: CreatedAppeal }) => {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
+  const { locale, t } = useLocale();
 
   const copy = async () => {
     haptic.tap();
@@ -40,10 +42,10 @@ export const SuccessScreen = ({ appeal }: { appeal: CreatedAppeal }) => {
        */
       await navigator.clipboard.writeText(appeal.publicNo);
       setCopied(true);
-      toast.success("Raqam nusxalandi");
+      toast.success(t("success.copied"));
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("Nusxalab bo'lmadi — raqamni yozib oling");
+      toast.error(t("success.copyFailed"));
     }
   };
 
@@ -56,14 +58,11 @@ export const SuccessScreen = ({ appeal }: { appeal: CreatedAppeal }) => {
         </div>
 
         <h1 className="animate-fade-up mt-5 text-center text-[24px] font-bold leading-tight">
-          Murojaat muvaffaqiyatli
-          <br />
-          yuborildi!
+          {t("success.title")}
         </h1>
 
         <p className="animate-fade-up mt-2.5 max-w-[20rem] text-center text-[14px] leading-relaxed text-muted-foreground">
-          Sizning murojaatingiz ro&apos;yxatga olindi va mas&apos;ul tashkilotga
-          yo&apos;naltirildi.
+          {t("success.body")}
         </p>
 
         {/* ── RAQAM ───────────────────────────────────────────── */}
@@ -82,7 +81,7 @@ export const SuccessScreen = ({ appeal }: { appeal: CreatedAppeal }) => {
 
           <span className="min-w-0 flex-1">
             <span className="block text-[11px] text-muted-foreground">
-              Murojaat raqami
+              {t("success.number")}
             </span>
             <span className="block text-[18px] font-bold tabular-nums">
               {appeal.publicNo}
@@ -98,7 +97,7 @@ export const SuccessScreen = ({ appeal }: { appeal: CreatedAppeal }) => {
             <FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
             <span className="min-w-0">
               <span className="block text-[11px] text-muted-foreground">
-                Muammo turi
+                {t("success.category")}
               </span>
               <span className="mt-0.5 block text-[14px] font-medium">
                 {appeal.categoryName}
@@ -111,7 +110,7 @@ export const SuccessScreen = ({ appeal }: { appeal: CreatedAppeal }) => {
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
               <span className="min-w-0">
                 <span className="block text-[11px] text-muted-foreground">
-                  Joylashuv
+                  {t("success.place")}
                 </span>
                 <span className="mt-0.5 block text-[14px] font-medium">
                   {appeal.address}
@@ -124,13 +123,13 @@ export const SuccessScreen = ({ appeal }: { appeal: CreatedAppeal }) => {
             <Clock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
             <span className="min-w-0">
               <span className="block text-[11px] text-muted-foreground">
-                Taxminiy javob muddati
+                {t("success.sla")}
               </span>
               <span className="mt-0.5 block text-[14px] font-medium">
-                {slaLabel(appeal.slaHours)}
+                {slaLabel(appeal.slaHours, t)}
                 {appeal.dueAt ? (
                   <span className="ml-1.5 font-normal text-muted-foreground">
-                    ({formatDateTimeUz(appeal.dueAt)})
+                    ({formatDateTimeUz(appeal.dueAt, locale)})
                   </span>
                 ) : null}
               </span>
@@ -146,7 +145,7 @@ export const SuccessScreen = ({ appeal }: { appeal: CreatedAppeal }) => {
           size="lg"
           onClick={() => router.replace(`/appeals/detail?id=${appeal.id}`)}
         >
-          Murojaat holatini kuzatish
+          {t("success.track")}
         </Button>
 
         <Button
@@ -155,7 +154,7 @@ export const SuccessScreen = ({ appeal }: { appeal: CreatedAppeal }) => {
           icon={<Home className="h-[18px] w-[18px]" />}
           onClick={() => router.replace("/")}
         >
-          Bosh sahifaga qaytish
+          {t("success.home")}
         </Button>
       </div>
     </div>

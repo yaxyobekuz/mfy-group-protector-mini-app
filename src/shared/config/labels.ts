@@ -1,5 +1,5 @@
 /**
- * YORLIQLAR — YAGONA MANBA (mobil ilova).
+ * YORLIQLAR — YAGONA MANBA (mini-ilova).
  *
  * ⚠️ YORLIQ KOMPONENT ICHIDA YOZILMAYDI — admin paneldagi bilan
  * AYNI qoida: holat nomi o'nlab joyda ko'rinadi (ro'yxat, filtr,
@@ -12,12 +12,20 @@
  * noqulay matn berardi: fuqaroga "ko'rib chiqilmoqda" hech narsa
  * aytmaydi, xodimga esa "bajarilmoqda" ijro bosqichini noto'g'ri
  * ko'rsatardi.
+ *
+ * ⚠️ MATNNING O'ZI BU YERDA EMAS, `dictionary.ts` DA — chunki u
+ * TO'RT tilda. Bu yerda faqat RANG va kalit qoladi: rang tilga
+ * bog'liq emas va uni lug'atga qo'shish har tarjimada ranglarni
+ * ham takrorlashga majburlardi.
  */
 
+import type { MessageKey } from "./dictionary";
+import type { Translate } from "../lib/i18n";
 import type { AppealStatus, Priority } from "../api/types";
 
 interface LabelDef {
-  label: string;
+  /** Matn kaliti — `t()` orqali o'qiladi. */
+  key: MessageKey;
   /** Yorliq (badge) uchun klasslar. */
   className: string;
   /** Nuqta/chiziq uchun toza rang klassi. */
@@ -26,32 +34,32 @@ interface LabelDef {
 
 export const APPEAL_STATUS: Record<AppealStatus, LabelDef> = {
   new: {
-    label: "Qabul qilindi",
+    key: "status.new",
     className: "bg-accent text-accent-foreground",
     dot: "bg-primary",
   },
   in_progress: {
-    label: "Bajarilmoqda",
+    key: "status.in_progress",
     className: "bg-warning/15 text-warning",
     dot: "bg-warning",
   },
   resolved: {
-    label: "Hal qilindi",
+    key: "status.resolved",
     className: "bg-success/15 text-success",
     dot: "bg-success",
   },
   rejected: {
-    label: "Rad etildi",
+    key: "status.rejected",
     className: "bg-muted text-muted-foreground",
     dot: "bg-muted-foreground",
   },
 };
 
-export const PRIORITY: Record<Priority, string> = {
-  low: "Past",
-  normal: "O'rta",
-  high: "Yuqori",
-  urgent: "Shoshilinch",
+export const PRIORITY: Record<Priority, MessageKey> = {
+  low: "priority.low",
+  normal: "priority.normal",
+  high: "priority.high",
+  urgent: "priority.urgent",
 };
 
 /**
@@ -63,27 +71,36 @@ export const PRIORITY: Record<Priority, string> = {
  * albatta "3/5" bo'lib qolardi.
  */
 export const WIZARD_STEPS = [
-  { key: "category", title: "Muammo turini tanlang", hint: "Eng mos turini tanlang. AI tizim uni avtomatik tasniflaydi." },
-  { key: "media", title: "Foto yoki video qo'shing", hint: "Muammoni aniq ko'rsatadigan surat yoki video yuboring." },
-  { key: "location", title: "Manzilni belgilang", hint: "Xaritada aniq joyni belgilang yoki manzilni qo'lda kiriting." },
-  { key: "details", title: "Batafsil ma'lumot", hint: "Muammoni qisqacha tasvirlang. Bu ijrochilarga tezroq hal qilishga yordam beradi." },
-  { key: "review", title: "AI tahlili", hint: "Tizim yuborgan ma'lumotlaringizni tahlil qildi. Agar hammasi to'g'ri bo'lsa, tasdiqlang." },
-] as const;
+  { key: "category", title: "wizard.step.category", hint: "wizard.step.categoryHint" },
+  { key: "media", title: "wizard.step.media", hint: "wizard.step.mediaHint" },
+  { key: "location", title: "wizard.step.location", hint: "wizard.step.locationHint" },
+  { key: "details", title: "wizard.step.details", hint: "wizard.step.detailsHint" },
+  { key: "review", title: "wizard.step.review", hint: "wizard.step.reviewHint" },
+] as const satisfies readonly {
+  key: string;
+  title: MessageKey;
+  hint: MessageKey;
+}[];
 
 export type WizardStepKey = (typeof WIZARD_STEPS)[number]["key"];
-
-/** "12 ta murojaat" — paneldagi `plural` bilan ayni. */
-export const plural = (count: number, word: string): string => `${count} ta ${word}`;
 
 /**
  * JAVOB MUDDATI — SOATDAN O'QILADIGAN MATNGA.
  *
  * ⚠️ "72 soat" EMAS, "3 kun": odam kun bilan o'ylaydi va "72 soat"
  * ni aqlda bo'lishga majbur qilish ma'nosiz ish.
+ *
+ * ⚠️ MATNNI O'ZI YIG'MAYDI, KALIT QAYTARADI: "3 kun" / "3 дн." /
+ * "3 days" — tilga bog'liq va uni shu yerda yozish lug'atdan
+ * chetlab o'tish bo'lardi.
  */
-export const slaLabel = (hours: number): string => {
-  if (hours < 24) return `${hours} soat`;
+export const slaParts = (hours: number): { key: MessageKey; count: number } =>
+  hours < 24
+    ? { key: "time.hours", count: hours }
+    : { key: "time.days", count: Math.round(hours / 24) };
 
-  const days = Math.round(hours / 24);
-  return `${days} kun`;
+/** Tayyor matn — "3 kun" / "3 дн." / "3 days". */
+export const slaLabel = (hours: number, t: Translate): string => {
+  const { key, count } = slaParts(hours);
+  return t(key, { count });
 };

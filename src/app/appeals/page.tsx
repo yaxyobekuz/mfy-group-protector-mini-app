@@ -19,6 +19,8 @@ import { useMyAppeals } from "@/features/appeals/api";
 import { AppealCard } from "@/features/appeals/appeal-card";
 import type { AppealStatus } from "@/shared/api/types";
 import { cn } from "@/shared/lib/cn";
+import { useT } from "@/shared/lib/i18n";
+import type { MessageKey } from "@/shared/config/dictionary";
 import { haptic } from "@/shared/lib/telegram";
 import { CardSkeleton, EmptyState, ErrorState } from "@/shared/ui/states";
 import { BottomNav } from "@/widgets/bottom-nav/bottom-nav";
@@ -33,15 +35,16 @@ type Tab = "all" | "open" | "closed";
  * ro'yxatni ilovada ajratadi — ikkita so'rov yuborish yoki
  * serverga "ochiq" degan sun'iy holat qo'shishdan sodda.
  */
-const TABS: { key: Tab; label: string }[] = [
-  { key: "all", label: "Barchasi" },
-  { key: "open", label: "Jarayonda" },
-  { key: "closed", label: "Yopilgan" },
+const TABS: { key: Tab; label: MessageKey }[] = [
+  { key: "all", label: "appeals.tab.all" },
+  { key: "open", label: "appeals.tab.open" },
+  { key: "closed", label: "appeals.tab.closed" },
 ];
 
 export default function AppealsPage() {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("all");
+  const t = useT();
 
   const { data, isLoading, isError, refetch } = useMyAppeals();
 
@@ -66,7 +69,7 @@ export default function AppealsPage() {
   return (
     <div className="min-h-screen pb-nav">
       <PageHeader
-        title="Mening murojaatlarim"
+        title={t("appeals.title")}
         below={
           <div className="flex gap-1.5">
             {TABS.map((item) => {
@@ -88,7 +91,7 @@ export default function AppealsPage() {
                       : "bg-secondary text-muted-foreground",
                   )}
                 >
-                  {item.label}
+                  {t(item.label)}
                   {count !== null ? (
                     <span className="ml-1 tabular-nums opacity-80">({count})</span>
                   ) : null}
@@ -109,19 +112,15 @@ export default function AppealsPage() {
             icon={<FileText className="h-6 w-6" />}
             title={
               tab === "all"
-                ? "Hali murojaat yubormagansiz"
+                ? t("appeals.empty.all")
                 : tab === "open"
-                  ? "Jarayondagi murojaat yo'q"
-                  : "Yopilgan murojaat yo'q"
+                  ? t("appeals.empty.open")
+                  : t("appeals.empty.closed")
             }
-            hint={
-              tab === "all"
-                ? "Hududingizdagi muammoni fotosurat bilan yuboring — biz uni mas'ul tashkilotga yo'naltiramiz."
-                : undefined
-            }
+            hint={tab === "all" ? t("appeals.empty.allHint") : undefined}
             action={
               tab === "all"
-                ? { label: "Murojaat yuborish", onClick: () => router.push("/new") }
+                ? { label: t("nav.newAppeal"), onClick: () => router.push("/new") }
                 : undefined
             }
           />

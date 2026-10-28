@@ -27,6 +27,7 @@ import { useCategories, useAnalyze, useCreateAppeal } from "@/features/appeals/a
 import { BODY_MIN, MAX_ATTACHMENTS } from "@/shared/config/limits";
 import { WIZARD_STEPS } from "@/shared/config/labels";
 import { cn } from "@/shared/lib/cn";
+import { useT } from "@/shared/lib/i18n";
 import { haptic, showBackButton } from "@/shared/lib/telegram";
 import { Button } from "@/shared/ui/button";
 import { Sheet } from "@/shared/ui/sheet";
@@ -55,6 +56,7 @@ export const Wizard = () => {
   const [state, setState] = useState<WizardState>(EMPTY_STATE);
   const [confirmExit, setConfirmExit] = useState(false);
   const [created, setCreated] = useState<CreatedAppeal | null>(null);
+  const t = useT();
 
   const categories = useCategories();
   const analyze = useAnalyze();
@@ -212,7 +214,7 @@ export const Wizard = () => {
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"
-              aria-label="Yopish"
+              aria-label={t("common.close")}
               onClick={exit}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground"
             >
@@ -227,9 +229,11 @@ export const Wizard = () => {
             </span>
           </div>
 
-          <h1 className="mt-3 text-[21px] font-bold leading-tight">{current.title}</h1>
+          <h1 className="mt-3 text-[21px] font-bold leading-tight">
+            {t(current.title)}
+          </h1>
           <p className="mt-1 text-[13px] leading-snug text-muted-foreground">
-            {current.hint}
+            {t(current.hint)}
           </p>
 
           {/* Jarayon chizig'i — qadamlar soniga qarab. */}
@@ -324,7 +328,7 @@ export const Wizard = () => {
             }
             onClick={() => void next()}
           >
-            {step === LAST_STEP ? "Murojaatni yuborish" : "Davom etish"}
+            {step === LAST_STEP ? t("wizard.submit") : t("common.continue")}
             {step < LAST_STEP ? <ArrowRight className="h-[18px] w-[18px]" /> : null}
           </Button>
         </div>
@@ -334,16 +338,15 @@ export const Wizard = () => {
       <Sheet
         open={confirmExit}
         onClose={() => setConfirmExit(false)}
-        title="Murojaatni tashlab ketasizmi?"
+        title={t("wizard.exit.title")}
       >
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Yozganlaringiz saqlanadi va keyingi safar shu joydan davom etishingiz
-          mumkin.
+          {t("wizard.exit.body")}
         </p>
 
         <div className="mt-5 space-y-2">
           <Button full variant="secondary" onClick={() => setConfirmExit(false)}>
-            Davom etish
+            {t("common.continue")}
           </Button>
           <Button
             full
@@ -358,7 +361,7 @@ export const Wizard = () => {
               router.replace("/");
             }}
           >
-            Tashlab ketish
+            {t("wizard.exit.leave")}
           </Button>
         </div>
       </Sheet>

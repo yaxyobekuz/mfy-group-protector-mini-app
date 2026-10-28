@@ -19,8 +19,10 @@ import { useMemo, useState } from "react";
 import { useSession } from "@/entities/session/session-provider";
 import { useTerritory } from "@/features/appeals/api";
 import { useUpdateProfile } from "@/features/profile/api";
+import { LanguagePicker } from "@/features/profile/language-picker";
 import { fileUrl } from "@/shared/api/client";
 import { cn } from "@/shared/lib/cn";
+import { useLocale } from "@/shared/lib/i18n";
 import { formatDateUz } from "@/shared/lib/date";
 import { haptic } from "@/shared/lib/telegram";
 import { Button } from "@/shared/ui/button";
@@ -33,6 +35,7 @@ export default function ProfilePage() {
   const { citizen } = useSession();
   const territory = useTerritory();
   const update = useUpdateProfile();
+  const { locale, t } = useLocale();
 
   const [phone, setPhone] = useState(citizen.phone ?? "");
   const [picking, setPicking] = useState<"district" | "mahalla" | null>(null);
@@ -52,7 +55,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen pb-nav">
-      <PageHeader title="Profil" />
+      <PageHeader title={t("profile.title")} />
 
       <main className="mx-auto max-w-lg space-y-3 px-4 py-4">
         {/* ── SHAXS ─────────────────────────────────────────── */}
@@ -78,7 +81,7 @@ export default function ProfilePage() {
               </span>
             ) : null}
             <span className="mt-0.5 block text-[11px] text-muted-foreground">
-              {formatDateUz(citizen.createdAt)} dan beri
+              {t("profile.since", { date: formatDateUz(citizen.createdAt, locale) })}
             </span>
           </span>
         </section>
@@ -86,9 +89,9 @@ export default function ProfilePage() {
         {/* ── SANOQLAR ──────────────────────────────────────── */}
         <section className="grid grid-cols-3 gap-2.5">
           {[
-            { value: citizen.stats.total, label: "Murojaat", icon: FileText },
-            { value: citizen.stats.resolved, label: "Hal qilindi", icon: FileText },
-            { value: citizen.points, label: "Ball", icon: Award },
+            { value: citizen.stats.total, label: t("profile.stat.appeals"), icon: FileText },
+            { value: citizen.stats.resolved, label: t("profile.stat.resolved"), icon: FileText },
+            { value: citizen.points, label: t("profile.stat.points"), icon: Award },
           ].map((item, index) => (
             <div key={index} className="card p-3 text-center">
               <p className="text-[20px] font-bold leading-none tabular-nums">
@@ -111,9 +114,11 @@ export default function ProfilePage() {
           >
             <MapPin className="h-4.5 w-4.5 shrink-0 text-muted-foreground" />
             <span className="min-w-0 flex-1">
-              <span className="block text-[11px] text-muted-foreground">Tuman</span>
+              <span className="block text-[11px] text-muted-foreground">
+                {t("location.district")}
+              </span>
               <span className="mt-0.5 block truncate text-[14px] font-medium">
-                {citizen.districtName ?? "Tanlanmagan"}
+                {citizen.districtName ?? t("common.notSelected")}
               </span>
             </span>
           </button>
@@ -129,25 +134,32 @@ export default function ProfilePage() {
           >
             <MapPin className="h-4.5 w-4.5 shrink-0 text-muted-foreground" />
             <span className="min-w-0 flex-1">
-              <span className="block text-[11px] text-muted-foreground">MFY</span>
+              <span className="block text-[11px] text-muted-foreground">
+                {t("location.mahalla")}
+              </span>
               <span className="mt-0.5 block truncate text-[14px] font-medium">
-                {citizen.mahallaName ?? "Tanlanmagan"}
+                {citizen.mahallaName ?? t("common.notSelected")}
               </span>
             </span>
           </button>
         </section>
 
+        {/* ── TIL ───────────────────────────────────────────── */}
+        <section className="card">
+          <LanguagePicker />
+        </section>
+
         {/* ── TELEFON ───────────────────────────────────────── */}
         <section className="card space-y-3 p-4">
           <Field
-            label="Telefon raqami"
+            label={t("profile.phone")}
             placeholder="+998 __ ___ __ __"
             value={phone}
             inputMode="tel"
             maxLength={32}
             onChange={(event) => setPhone(event.target.value)}
             icon={<Phone className="h-4 w-4" />}
-            hint="Ixtiyoriy — ma'muriyat qayta aloqa qilishi uchun"
+            hint={t("profile.phoneHint")}
           />
 
           {phoneChanged ? (
@@ -157,7 +169,7 @@ export default function ProfilePage() {
               pending={update.isPending}
               onClick={() => update.mutate({ phone: phone.trim() })}
             >
-              Saqlash
+              {t("common.save")}
             </Button>
           ) : null}
         </section>
@@ -167,7 +179,7 @@ export default function ProfilePage() {
       <Sheet
         open={picking === "district"}
         onClose={() => setPicking(null)}
-        title="Tumanni tanlang"
+        title={t("location.pickDistrict")}
         tall
       >
         <div className="space-y-1.5">
@@ -198,7 +210,7 @@ export default function ProfilePage() {
       <Sheet
         open={picking === "mahalla"}
         onClose={() => setPicking(null)}
-        title="MFY ni tanlang"
+        title={t("location.pickMahalla")}
         tall
       >
         <div className="space-y-1.5">

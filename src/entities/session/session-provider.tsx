@@ -25,6 +25,7 @@ import type { CitizenProfile } from "@/shared/api/types";
 import { LoadingBlock } from "@/shared/ui/states";
 import { Button } from "@/shared/ui/button";
 import { closeApp } from "@/shared/lib/telegram";
+import { useT } from "@/shared/lib/i18n";
 import { Onboarding } from "./onboarding";
 
 interface SessionValue {
@@ -50,6 +51,7 @@ export const useSession = (): SessionValue => {
 export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const [ready, setReady] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const t = useT();
 
   /**
    * ⚠️ TOKEN BOR BO'LSA KIRISH TAKRORLANMAYDI: har ochilishda
@@ -111,11 +113,11 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     const message =
       query.error instanceof ApiError
         ? query.error.message
-        : "Serverga ulanib bo'lmadi. Internetni tekshirib, ilovani qayta oching.";
+        : t("session.offline");
 
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-8 text-center">
-        <h1 className="text-xl font-bold">Ilovaga kirib bo&apos;lmadi</h1>
+        <h1 className="text-xl font-bold">{t("session.failed")}</h1>
         <p className="text-sm text-muted-foreground">{message}</p>
 
         <div className="mt-2 flex w-full max-w-xs flex-col gap-2">
@@ -129,10 +131,10 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
               window.location.reload();
             }}
           >
-            Qaytadan urinish
+            {t("common.retry")}
           </Button>
           <Button full variant="ghost" onClick={closeApp}>
-            Yopish
+            {t("common.close")}
           </Button>
         </div>
       </div>

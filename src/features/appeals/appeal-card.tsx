@@ -19,11 +19,13 @@ import type { AppealListItem } from "@/shared/api/types";
 import { categoryColor, categoryIcon } from "@/shared/config/icons";
 import { APPEAL_STATUS } from "@/shared/config/labels";
 import { cn } from "@/shared/lib/cn";
+import { useLocale } from "@/shared/lib/i18n";
 import { formatDateTimeUz } from "@/shared/lib/date";
 import { haptic } from "@/shared/lib/telegram";
 import { fileUrl } from "@/shared/api/client";
 
 export const AppealCard = ({ appeal }: { appeal: AppealListItem }) => {
+  const { locale, t } = useLocale();
   const Icon = categoryIcon(appeal.category.icon);
   const color = categoryColor(appeal.category.color);
   const status = APPEAL_STATUS[appeal.status];
@@ -46,7 +48,7 @@ export const AppealCard = ({ appeal }: { appeal: AppealListItem }) => {
             status.className,
           )}
         >
-          {status.label}
+          {t(status.key)}
         </span>
       </div>
 
@@ -75,7 +77,7 @@ export const AppealCard = ({ appeal }: { appeal: AppealListItem }) => {
           ) : null}
 
           <span className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
-            <span>{formatDateTimeUz(appeal.createdAt)}</span>
+            <span>{formatDateTimeUz(appeal.createdAt, locale)}</span>
 
             {appeal.photos.length > 0 ? (
               <span className="flex items-center gap-0.5">

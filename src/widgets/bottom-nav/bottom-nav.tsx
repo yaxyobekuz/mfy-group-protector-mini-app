@@ -17,22 +17,25 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 import { cn } from "@/shared/lib/cn";
+import { useT, type Translate } from "@/shared/lib/i18n";
+import type { MessageKey } from "@/shared/config/dictionary";
 import { haptic } from "@/shared/lib/telegram";
 
 interface NavItem {
   href: string;
-  label: string;
+  /** ⚠️ KALIT, MATN EMAS: yorliq til almashganda yangilanishi kerak. */
+  label: MessageKey;
   icon: typeof Home;
 }
 
 const LEFT: NavItem[] = [
-  { href: "/", label: "Bosh sahifa", icon: Home },
-  { href: "/map", label: "Xarita", icon: Map },
+  { href: "/", label: "nav.home", icon: Home },
+  { href: "/map", label: "nav.map", icon: Map },
 ];
 
 const RIGHT: NavItem[] = [
-  { href: "/news", label: "Yangiliklar", icon: FileText },
-  { href: "/profile", label: "Profil", icon: User },
+  { href: "/news", label: "nav.news", icon: FileText },
+  { href: "/profile", label: "nav.profile", icon: User },
 ];
 
 /** ⚠️ SEHRGAR VA UNING OSTIDAGI YO'LLARDA MENYU YO'Q. */
@@ -52,7 +55,15 @@ const HIDDEN_PREFIXES = ["/new"];
 const underRoute = (pathname: string, route: string): boolean =>
   pathname === route || pathname.startsWith(`${route}/`);
 
-const Tab = ({ item, active }: { item: NavItem; active: boolean }) => {
+const Tab = ({
+  item,
+  active,
+  t,
+}: {
+  item: NavItem;
+  active: boolean;
+  t: Translate;
+}) => {
   const Icon = item.icon;
 
   return (
@@ -70,7 +81,7 @@ const Tab = ({ item, active }: { item: NavItem; active: boolean }) => {
           xil qalinlikda qoladi. */}
       <Icon className="h-[22px] w-[22px]" strokeWidth={1.5} />
       <span className={cn("text-[10px] leading-none", active && "font-semibold")}>
-        {item.label}
+        {t(item.label)}
       </span>
     </Link>
   );
@@ -79,6 +90,7 @@ const Tab = ({ item, active }: { item: NavItem; active: boolean }) => {
 export const BottomNav = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const t = useT();
 
   if (HIDDEN_PREFIXES.some((route) => underRoute(pathname, route))) return null;
 
@@ -92,7 +104,7 @@ export const BottomNav = () => {
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card shadow-nav safe-bottom">
       <div className="mx-auto flex max-w-lg items-stretch px-2">
         {LEFT.map((item) => (
-          <Tab key={item.href} item={item} active={isActive(item.href)} />
+          <Tab key={item.href} item={item} active={isActive(item.href)} t={t} />
         ))}
 
         {/* ⚠️ KO'TARILGAN TUGMA MENYUDAN TASHQARIGA CHIQADI
@@ -101,7 +113,7 @@ export const BottomNav = () => {
         <div className="flex w-[4.5rem] shrink-0 justify-center">
           <button
             type="button"
-            aria-label="Murojaat yuborish"
+            aria-label={t("nav.newAppeal")}
             onClick={() => {
               haptic.press();
               router.push("/new");
@@ -117,7 +129,7 @@ export const BottomNav = () => {
         </div>
 
         {RIGHT.map((item) => (
-          <Tab key={item.href} item={item} active={isActive(item.href)} />
+          <Tab key={item.href} item={item} active={isActive(item.href)} t={t} />
         ))}
       </div>
     </nav>

@@ -18,6 +18,7 @@ import { useMarkNewsViewed, useNews } from "@/features/news/api";
 import { fileUrl } from "@/shared/api/client";
 import type { NewsItem } from "@/shared/api/types";
 import { formatDateUz } from "@/shared/lib/date";
+import { useLocale } from "@/shared/lib/i18n";
 import { haptic } from "@/shared/lib/telegram";
 import { Sheet } from "@/shared/ui/sheet";
 import { CardSkeleton, EmptyState, ErrorState } from "@/shared/ui/states";
@@ -28,6 +29,7 @@ export default function NewsPage() {
   const { data, isLoading, isError, refetch } = useNews();
   const markViewed = useMarkNewsViewed();
   const [open, setOpen] = useState<NewsItem | null>(null);
+  const { locale, t } = useLocale();
 
   const show = (item: NewsItem) => {
     haptic.tap();
@@ -39,7 +41,7 @@ export default function NewsPage() {
 
   return (
     <div className="min-h-screen pb-nav">
-      <PageHeader title="Yangiliklar" />
+      <PageHeader title={t("news.title")} />
 
       <main className="mx-auto max-w-lg space-y-3 px-4 py-4">
         {isLoading ? (
@@ -49,8 +51,8 @@ export default function NewsPage() {
         ) : (data?.length ?? 0) === 0 ? (
           <EmptyState
             icon={<ScrollText className="h-6 w-6" />}
-            title="Hozircha yangilik yo'q"
-            hint="Hududingizdagi e'lonlar va natijalar shu yerda ko'rinadi."
+            title={t("news.empty")}
+            hint={t("news.emptyHint")}
           />
         ) : (
           data!.map((item) => {
@@ -78,11 +80,11 @@ export default function NewsPage() {
                     {item.isPinned ? (
                       <span className="flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 font-semibold text-accent-foreground">
                         <Pin className="h-3 w-3" />
-                        Muhim
+                        {t("news.pinned")}
                       </span>
                     ) : null}
 
-                    <span>{formatDateUz(item.publishedAt)}</span>
+                    <span>{formatDateUz(item.publishedAt, locale)}</span>
 
                     {item.districtName ? <span>· {item.districtName}</span> : null}
 
@@ -124,7 +126,7 @@ export default function NewsPage() {
             ) : null}
 
             <p className="text-[11px] text-muted-foreground">
-              {formatDateUz(open.publishedAt)}
+              {formatDateUz(open.publishedAt, locale)}
               {open.districtName ? ` · ${open.districtName}` : ""}
             </p>
 

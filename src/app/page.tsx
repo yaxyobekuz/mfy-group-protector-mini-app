@@ -28,12 +28,14 @@ import { useSession } from "@/entities/session/session-provider";
 import { useHomeStats } from "@/features/appeals/api";
 import { BottomNav } from "@/widgets/bottom-nav/bottom-nav";
 import { cn } from "@/shared/lib/cn";
+import { useT, type Translate } from "@/shared/lib/i18n";
+import type { MessageKey } from "@/shared/config/dictionary";
 import { haptic } from "@/shared/lib/telegram";
 
 interface TileProps {
   href: string;
-  label: string;
-  hint: string;
+  label: MessageKey;
+  hint: MessageKey;
   icon: typeof Map;
   tone: string;
 }
@@ -41,35 +43,42 @@ interface TileProps {
 const TILES: TileProps[] = [
   {
     href: "/map",
-    label: "Xarita",
-    hint: "Murojaatlar xaritasi",
+    label: "home.tile.map",
+    hint: "home.tile.mapHint",
     icon: Map,
     tone: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400",
   },
   {
     href: "/appeals",
-    label: "Mening murojaatlarim",
-    hint: "Holatini kuzating",
+    label: "home.tile.appeals",
+    hint: "home.tile.appealsHint",
     icon: FileText,
     tone: "bg-violet-500/12 text-violet-600 dark:text-violet-400",
   },
   {
     href: "/news",
-    label: "Yangiliklar",
-    hint: "Va natijalar",
+    label: "home.tile.news",
+    hint: "home.tile.newsHint",
     icon: ScrollText,
     tone: "bg-sky-500/12 text-sky-600 dark:text-sky-400",
   },
   {
     href: "/rating",
-    label: "Reyting",
-    hint: "Faol fuqarolar",
+    label: "home.tile.rating",
+    hint: "home.tile.ratingHint",
     icon: Trophy,
     tone: "bg-amber-500/12 text-amber-600 dark:text-amber-400",
   },
 ];
 
-const Tile = ({ href, label, hint, icon: Icon, tone }: TileProps) => (
+const Tile = ({
+  href,
+  label,
+  hint,
+  icon: Icon,
+  tone,
+  t,
+}: TileProps & { t: Translate }) => (
   <Link
     href={href}
     onClick={() => haptic.tap()}
@@ -91,10 +100,10 @@ const Tile = ({ href, label, hint, icon: Icon, tone }: TileProps) => (
     */}
     <span className="min-w-0">
       <span className="line-clamp-2 block text-[13px] font-semibold leading-tight">
-        {label}
+        {t(label)}
       </span>
       <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
-        {hint}
+        {t(hint)}
       </span>
     </span>
   </Link>
@@ -117,8 +126,9 @@ export default function HomePage() {
   const { citizen } = useSession();
   const router = useRouter();
   const stats = useHomeStats();
+  const t = useT();
 
-  const place = citizen.districtName ?? "Andijon viloyati";
+  const place = citizen.districtName ?? t("home.defaultPlace");
 
   return (
     <div className="min-h-screen pb-nav">
@@ -139,14 +149,11 @@ export default function HomePage() {
           <p className="text-[13px] font-medium opacity-90">{place}</p>
 
           <h1 className="mt-2 text-[27px] font-bold leading-[1.15]">
-            Toza va qulay
-            <br />
-            hudud uchun birga!
+            {t("home.title")}
           </h1>
 
           <p className="mt-2.5 max-w-[20rem] text-[13px] leading-relaxed opacity-90">
-            Hududingizdagi muammolarni fotosurat bilan yuboring. Biz ularni hal
-            qilishga yordam beramiz.
+            {t("home.subtitle")}
           </p>
 
           <button
@@ -162,7 +169,7 @@ export default function HomePage() {
           >
             <span className="flex items-center gap-2">
               <Plus className="h-5 w-5" strokeWidth={2.5} />
-              Murojaat yuborish
+              {t("nav.newAppeal")}
             </span>
             <ArrowRight className="h-5 w-5" />
           </button>
@@ -173,21 +180,21 @@ export default function HomePage() {
         {/* ── BO'LIMLAR ───────────────────────────────────────── */}
         <div className="grid grid-cols-2 gap-3">
           {TILES.map((tile) => (
-            <Tile key={tile.href} {...tile} />
+            <Tile key={tile.href} {...tile} t={t} />
           ))}
         </div>
 
         {/* ── UMUMIY RAQAMLAR ─────────────────────────────────── */}
         <section className="card p-4">
-          <h2 className="text-sm font-semibold">Viloyat bo&apos;yicha</h2>
+          <h2 className="text-sm font-semibold">{t("home.stats.title")}</h2>
 
           <div className="mt-3.5 flex items-start divide-x divide-border">
             {/* ⚠️ YUKLANAYOTGANDA NOL KO'RSATILADI, skelet emas:
                 uchta kichik raqam uchun skelet ekranni
                 "miltillatardi". */}
-            <Stat value={stats.data?.total ?? 0} label="Jami murojaat" />
-            <Stat value={stats.data?.resolved ?? 0} label="Hal qilindi" />
-            <Stat value={stats.data?.last30 ?? 0} label="Oxirgi 30 kun" />
+            <Stat value={stats.data?.total ?? 0} label={t("home.stats.total")} />
+            <Stat value={stats.data?.resolved ?? 0} label={t("home.stats.resolved")} />
+            <Stat value={stats.data?.last30 ?? 0} label={t("home.stats.last30")} />
           </div>
         </section>
 
@@ -199,11 +206,11 @@ export default function HomePage() {
             className="card flex items-center justify-between gap-3 p-4 transition active:scale-[0.99]"
           >
             <div className="min-w-0">
-              <p className="text-sm font-semibold">Sizning murojaatlaringiz</p>
+              <p className="text-sm font-semibold">{t("home.mine.title")}</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 {citizen.stats.open > 0
-                  ? `${citizen.stats.open} ta ko'rib chiqilmoqda`
-                  : `${citizen.stats.resolved} ta hal qilindi`}
+                  ? t("home.mine.open", { count: citizen.stats.open })
+                  : t("home.mine.resolved", { count: citizen.stats.resolved })}
               </p>
             </div>
 

@@ -22,6 +22,7 @@ import type { WizardFile } from "./wizard-state";
 import { fileUrl } from "@/shared/api/client";
 import { cn } from "@/shared/lib/cn";
 import { haptic } from "@/shared/lib/telegram";
+import { useT } from "@/shared/lib/i18n";
 import { Button } from "@/shared/ui/button";
 
 interface Props {
@@ -44,6 +45,7 @@ export const StepMedia = ({ files, max, onChange }: Props) => {
   const galleryRef = useRef<HTMLInputElement>(null);
 
   const total = files.length + pending.length;
+  const t = useT();
   const remaining = Math.max(0, max - total);
 
   const handleFiles = async (list: FileList | null) => {
@@ -171,9 +173,9 @@ export const StepMedia = ({ files, max, onChange }: Props) => {
             >
               <Plus className="h-5 w-5" />
               <span className="text-[10px] leading-tight">
-                Yana qo&apos;shish
+                {t("media.addMore")}
                 <br />
-                (maks. {max} ta)
+                {t("media.max", { count: max })}
               </span>
             </button>
           ) : null}
@@ -191,9 +193,9 @@ export const StepMedia = ({ files, max, onChange }: Props) => {
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
             <Camera className="h-6 w-6" />
           </span>
-          <span className="text-sm font-semibold">Surat yoki video qo&apos;shing</span>
+          <span className="text-sm font-semibold">{t("media.empty")}</span>
           <span className="max-w-[16rem] text-center text-xs text-muted-foreground">
-            Surat murojaatni tezroq hal qilishga yordam beradi
+            {t("media.emptyHint")}
           </span>
         </button>
       )}
@@ -206,7 +208,7 @@ export const StepMedia = ({ files, max, onChange }: Props) => {
           disabled={remaining === 0}
           onClick={() => cameraRef.current?.click()}
         >
-          Kameradan
+          {t("media.camera")}
         </Button>
         <Button
           variant="secondary"
@@ -214,7 +216,7 @@ export const StepMedia = ({ files, max, onChange }: Props) => {
           disabled={remaining === 0}
           onClick={() => galleryRef.current?.click()}
         >
-          Galereyadan
+          {t("media.gallery")}
         </Button>
       </div>
 
@@ -256,7 +258,7 @@ export const StepMedia = ({ files, max, onChange }: Props) => {
         {/* ⚠️ "MAJBURIY EMAS" AYTILADI: fuqaro suratsiz murojaat
             yubora olmaydi deb o'ylab, oqimni tashlab ketishi
             mumkin. */}
-        Surat majburiy emas — usiz ham davom etishingiz mumkin
+        {t("media.optional")}
       </p>
     </div>
   );

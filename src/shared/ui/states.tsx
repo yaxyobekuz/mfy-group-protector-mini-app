@@ -16,18 +16,23 @@ import { AlertCircle, Inbox, Loader2 } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "../lib/cn";
+import { useT } from "../lib/i18n";
 import { Button } from "./button";
 
 export const Spinner = ({ className }: { className?: string }) => (
   <Loader2 className={cn("h-5 w-5 animate-spin text-muted-foreground", className)} />
 );
 
-export const LoadingBlock = ({ label = "Yuklanmoqda…" }: { label?: string }) => (
-  <div className="flex flex-col items-center justify-center gap-3 py-16">
-    <Spinner className="h-7 w-7 text-primary" />
-    <p className="text-sm text-muted-foreground">{label}</p>
-  </div>
-);
+export const LoadingBlock = ({ label }: { label?: string }) => {
+  const t = useT();
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-16">
+      <Spinner className="h-7 w-7 text-primary" />
+      <p className="text-sm text-muted-foreground">{label ?? t("common.loading")}</p>
+    </div>
+  );
+};
 
 /**
  * SKELET.
@@ -81,23 +86,27 @@ interface ErrorProps {
   onRetry?: () => void;
 }
 
-export const ErrorState = ({ message, onRetry }: ErrorProps) => (
+export const ErrorState = ({ message, onRetry }: ErrorProps) => {
+  const t = useT();
+
+  return (
   <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
     <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
       <AlertCircle className="h-6 w-6" />
     </div>
-    <h3 className="text-base font-semibold">Xatolik yuz berdi</h3>
+    <h3 className="text-base font-semibold">{t("common.error")}</h3>
     {/* ⚠️ SERVER MATNI KO'RSATILADI: u o'zbek tilida va fuqaroga
         mo'ljallangan ("Bir kunda 10 tadan ko'p…"). Uni yashirib
         "Xatolik" deyish foydalanuvchini nima qilishni bilmay
         qoldirardi. */}
     <p className="max-w-[18rem] text-sm text-muted-foreground">
-      {message ?? "Internetni tekshirib, qaytadan urinib ko'ring"}
+      {message ?? t("common.errorHint")}
     </p>
     {onRetry ? (
       <Button variant="secondary" className="mt-2" onClick={onRetry}>
-        Qaytadan urinish
+        {t("common.retry")}
       </Button>
     ) : null}
   </div>
-);
+  );
+};

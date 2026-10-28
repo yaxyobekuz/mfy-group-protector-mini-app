@@ -24,6 +24,7 @@ import { useMemo, useState } from "react";
 import { useTerritory } from "@/features/appeals/api";
 import { useUpdateProfile } from "@/features/profile/api";
 import { cn } from "@/shared/lib/cn";
+import { useT } from "@/shared/lib/i18n";
 import { haptic } from "@/shared/lib/telegram";
 import { Button } from "@/shared/ui/button";
 import { LoadingBlock } from "@/shared/ui/states";
@@ -39,6 +40,7 @@ type Stage = "district" | "mahalla";
 export const Onboarding = ({ firstName, onDone }: Props) => {
   const territory = useTerritory();
   const update = useUpdateProfile();
+  const t = useT();
 
   const [stage, setStage] = useState<Stage>("district");
   const [districtId, setDistrictId] = useState<string | null>(null);
@@ -51,7 +53,7 @@ export const Onboarding = ({ firstName, onDone }: Props) => {
   );
 
   if (territory.isLoading) {
-    return <LoadingBlock label="Hududlar yuklanmoqda…" />;
+    return <LoadingBlock label={t("onboarding.loading")} />;
   }
 
   const handleSave = () => {
@@ -78,11 +80,10 @@ export const Onboarding = ({ firstName, onDone }: Props) => {
           <MapPin className="h-6 w-6" />
         </span>
         <h1 className="mt-4 text-[22px] font-bold leading-tight">
-          Xush kelibsiz, {firstName}!
+          {t("onboarding.welcome", { name: firstName })}
         </h1>
         <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
-          Murojaatlaringiz to&apos;g&apos;ri hududga yetib borishi uchun yashash
-          joyingizni tanlang.
+          {t("onboarding.body")}
         </p>
 
         {/* Ikki qadamli jarayon chizig'i. */}
@@ -100,7 +101,9 @@ export const Onboarding = ({ firstName, onDone }: Props) => {
       {/* ── RO'YXAT ───────────────────────────────────────────── */}
       <main className="flex-1 overflow-y-auto px-4 pb-40">
         <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          {stage === "district" ? "Tumanni tanlang" : "MFY (mahalla) ni tanlang"}
+          {stage === "district"
+            ? t("onboarding.pickDistrict")
+            : t("onboarding.pickMahalla")}
         </p>
 
         <div className="space-y-1.5">
@@ -149,8 +152,7 @@ export const Onboarding = ({ firstName, onDone }: Props) => {
                 ))
               : (
                   <p className="rounded-xl bg-secondary/50 px-4 py-6 text-center text-[13px] text-muted-foreground">
-                    Bu tumanda MFY ro&apos;yxati hali kiritilmagan. Boshqa tumanni
-                    tanlang yoki ma&apos;muriyatga murojaat qiling.
+                    {t("onboarding.noMahalla")}
                   </p>
                 )}
         </div>
@@ -165,7 +167,7 @@ export const Onboarding = ({ firstName, onDone }: Props) => {
             }}
             className="mt-3 px-1 text-[13px] font-medium text-primary"
           >
-            ← Tumanni o&apos;zgartirish
+            {t("onboarding.changeDistrict")}
           </button>
         ) : null}
       </main>
@@ -181,7 +183,7 @@ export const Onboarding = ({ firstName, onDone }: Props) => {
             icon={<ArrowRight className="h-[18px] w-[18px]" />}
             onClick={handleSave}
           >
-            Davom etish
+            {t("common.continue")}
           </Button>
         </div>
       </div>

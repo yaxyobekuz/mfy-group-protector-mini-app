@@ -27,6 +27,7 @@ import { useTerritory } from "@/features/appeals/api";
 import { useSession } from "@/entities/session/session-provider";
 import { ADDRESS_MAX, DEFAULT_CENTER } from "@/shared/config/limits";
 import { cn } from "@/shared/lib/cn";
+import { useT } from "@/shared/lib/i18n";
 import { haptic } from "@/shared/lib/telegram";
 import { Button } from "@/shared/ui/button";
 import { Field } from "@/shared/ui/field";
@@ -78,6 +79,8 @@ export const StepLocation = ({
     [lat, lng],
   );
 
+  const t = useT();
+
   const districts = territory.data?.districts ?? [];
   const mahallas = useMemo(
     () =>
@@ -100,7 +103,7 @@ export const StepLocation = ({
    */
   const locate = () => {
     if (!navigator.geolocation) {
-      toast.error("Qurilmangiz joylashuvni aniqlay olmaydi");
+      toast.error(t("location.noGeo"));
       return;
     }
 
@@ -122,8 +125,8 @@ export const StepLocation = ({
 
         toast.error(
           error.code === error.PERMISSION_DENIED
-            ? "Joylashuvga ruxsat berilmagan — xaritadan qo'lda belgilang"
-            : "Joylashuv aniqlanmadi — xaritadan qo'lda belgilang",
+            ? t("location.denied")
+            : t("location.failed"),
         );
       },
       // ⚠️ `enableHighAccuracy` YOQILGAN, lekin MUDDAT bilan:
@@ -178,18 +181,18 @@ export const StepLocation = ({
         pending={locating}
         onClick={locate}
       >
-        Joriy joylashuvni ishlatish
+        {t("location.useCurrent")}
       </Button>
 
       {/* ── MANZIL MATNI ──────────────────────────────────────── */}
       <Field
-        label="Manzil"
-        placeholder="Masalan: Bobur ko'chasi, 12-uy"
+        label={t("location.address")}
+        placeholder={t("location.addressPlaceholder")}
         value={address}
         maxLength={ADDRESS_MAX}
         onChange={(event) => onChange({ address: event.target.value })}
         icon={<MapPin className="h-4 w-4" />}
-        hint="Uy raqami yoki mo'ljal — ijrochiga joyni topishda yordam beradi"
+        hint={t("location.addressHint")}
       />
 
       {/* ── HUDUD ─────────────────────────────────────────────── */}
@@ -202,9 +205,11 @@ export const StepLocation = ({
           }}
           className="rounded-xl border border-input bg-card px-4 py-3 text-left"
         >
-          <span className="block text-[11px] text-muted-foreground">Tuman</span>
+          <span className="block text-[11px] text-muted-foreground">
+            {t("location.district")}
+          </span>
           <span className="mt-0.5 block truncate text-[14px] font-medium">
-            {districtName ?? "Tanlang"}
+            {districtName ?? t("common.select")}
           </span>
         </button>
 
@@ -217,9 +222,11 @@ export const StepLocation = ({
           }}
           className="rounded-xl border border-input bg-card px-4 py-3 text-left disabled:opacity-50"
         >
-          <span className="block text-[11px] text-muted-foreground">MFY</span>
+          <span className="block text-[11px] text-muted-foreground">
+            {t("location.mahalla")}
+          </span>
           <span className="mt-0.5 block truncate text-[14px] font-medium">
-            {mahallaName ?? "Ixtiyoriy"}
+            {mahallaName ?? t("common.optional")}
           </span>
         </button>
       </div>
@@ -228,7 +235,7 @@ export const StepLocation = ({
       <Sheet
         open={picking === "district"}
         onClose={() => setPicking(null)}
-        title="Tumanni tanlang"
+        title={t("location.pickDistrict")}
         tall
       >
         <div className="space-y-1.5">
@@ -261,7 +268,7 @@ export const StepLocation = ({
       <Sheet
         open={picking === "mahalla"}
         onClose={() => setPicking(null)}
-        title="MFY ni tanlang"
+        title={t("location.pickMahalla")}
         tall
       >
         <div className="space-y-1.5">
@@ -279,9 +286,9 @@ export const StepLocation = ({
                 : "bg-secondary/50",
             )}
           >
-            Bilmayman
+            {t("location.unknown")}
             <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
-              Hududni ma&apos;muriyat o&apos;zi aniqlaydi
+              {t("location.unknownHint")}
             </span>
           </button>
 

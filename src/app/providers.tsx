@@ -14,6 +14,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Toaster } from "sonner";
 
 import { SessionProvider } from "@/entities/session/session-provider";
+import { LocaleProvider } from "@/shared/lib/i18n";
 import {
   applyChrome,
   getColorScheme,
@@ -83,7 +84,12 @@ export const Providers = ({ children }: { children: ReactNode }) => {
 
   return (
     <QueryClientProvider client={client}>
-      <SessionProvider>{children}</SessionProvider>
+      {/* ⚠️ TIL SESSIYADAN TASHQARIDA: kirish xatosi ekrani ham
+          tarjima qilinadi va u `SessionProvider` ICHIDA
+          ko'rsatiladi — ya'ni til undan YUQORIDA bo'lishi kerak. */}
+      <LocaleProvider>
+        <SessionProvider>{children}</SessionProvider>
+      </LocaleProvider>
 
       {/* ⚠️ `top-center`: pastda menyu bor va u yerdagi bildirishnoma
           tugmalarni bosib qolardi. */}

@@ -19,6 +19,7 @@ import { useSession } from "@/entities/session/session-provider";
 import { useRating } from "@/features/news/api";
 import { fileUrl } from "@/shared/api/client";
 import { cn } from "@/shared/lib/cn";
+import { useT } from "@/shared/lib/i18n";
 import { haptic, showBackButton } from "@/shared/lib/telegram";
 import { CardSkeleton, EmptyState, ErrorState } from "@/shared/ui/states";
 import { PageHeader } from "@/widgets/page-header/page-header";
@@ -35,6 +36,7 @@ export default function RatingPage() {
   const router = useRouter();
   const { citizen } = useSession();
   const [scope, setScope] = useState<"province" | "district">("province");
+  const t = useT();
 
   const { data, isLoading, isError, refetch } = useRating(scope);
 
@@ -45,13 +47,16 @@ export default function RatingPage() {
   return (
     <div className="min-h-screen pb-10">
       <PageHeader
-        title="Faol fuqarolar"
+        title={t("rating.title")}
         below={
           <div className="flex gap-1.5">
             {(
               [
-                { key: "province", label: "Viloyat" },
-                { key: "district", label: citizen.districtName ?? "Mening tumanim" },
+                { key: "province", label: t("rating.province") },
+                {
+                  key: "district",
+                  label: citizen.districtName ?? t("rating.myDistrict"),
+                },
               ] as const
             ).map((item) => (
               <button
@@ -88,9 +93,9 @@ export default function RatingPage() {
         ) : (data?.length ?? 0) === 0 ? (
           <EmptyState
             icon={<Trophy className="h-6 w-6" />}
-            title="Reyting hali bo'sh"
-            hint="Birinchi murojaatni yuborib, ro'yxatda birinchi bo'ling."
-            action={{ label: "Murojaat yuborish", onClick: () => router.push("/new") }}
+            title={t("rating.empty")}
+            hint={t("rating.emptyHint")}
+            action={{ label: t("nav.newAppeal"), onClick: () => router.push("/new") }}
           />
         ) : (
           data!.map((row) => {
@@ -135,12 +140,12 @@ export default function RatingPage() {
                     {row.name}
                     {isMe ? (
                       <span className="ml-1.5 text-[11px] font-normal text-primary">
-                        (siz)
+                        ({t("common.you")})
                       </span>
                     ) : null}
                   </span>
                   <span className="block truncate text-[11px] text-muted-foreground">
-                    {row.appeals} ta murojaat
+                    {t("rating.appeals", { count: row.appeals })}
                     {row.districtName ? ` · ${row.districtName}` : ""}
                   </span>
                 </span>
@@ -149,7 +154,9 @@ export default function RatingPage() {
                   <span className="block text-[15px] font-bold tabular-nums text-primary">
                     {row.points}
                   </span>
-                  <span className="block text-[10px] text-muted-foreground">ball</span>
+                  <span className="block text-[10px] text-muted-foreground">
+                    {t("rating.points")}
+                  </span>
                 </span>
               </div>
             );
