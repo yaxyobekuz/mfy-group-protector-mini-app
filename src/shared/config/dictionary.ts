@@ -129,7 +129,7 @@ const MESSAGES = {
   "appeal.chat": ["Yozishma", "Ёзишма", "Переписка", "Conversation"],
   "appeal.sentAt": ["Yuborilgan", "Юборилган", "Отправлено", "Submitted"],
   "appeal.dueAt": ["Javob muddati", "Жавоб муддати", "Срок ответа", "Response due"],
-  "appeal.defaultOrg": ["Viloyat shtabi", "Вилоят штаби", "Областной штаб", "Regional HQ"],
+  "appeal.defaultOrg": ["E Murojaat", "E Murojaat", "E Murojaat", "E Murojaat"],
   "appeal.addInfo": [
     "Qo'shimcha ma'lumot yuborish",
     "Қўшимча маълумот юбориш",

@@ -1,7 +1,7 @@
 {
-  "name": "viloyat-shtabi-mini-app",
+  "name": "e-murojaat-mini-app",
   "version": "0.1.0",
-  "description": "Viloyat shtabi — fuqaro murojaati (Telegram Mini App)",
+  "description": "E Murojaat — fuqaro murojaati (Telegram Mini App)",
   "private": true,
   "scripts": {
     "dev": "node scripts/run-next.mjs dev",

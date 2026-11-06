@@ -1,4 +1,4 @@
-# Viloyat shtabi — mobil ilova (fuqaro murojaati)
+# E Murojaat — mobil ilova (fuqaro murojaati)
 
 Telegram Mini App: fuqaro hududidagi muammoni surat, joy va tavsif
 bilan yuboradi va javobni shu yerda ko'radi.

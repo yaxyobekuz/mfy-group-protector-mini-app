@@ -18,7 +18,7 @@ const sans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Viloyat shtabi — Murojaat",
+  title: "E Murojaat — Fuqaro murojaati",
   description: "Hududingizdagi muammolarni fotosurat bilan yuboring",
 };
 
