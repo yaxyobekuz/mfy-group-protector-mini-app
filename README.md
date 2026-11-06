@@ -163,7 +163,7 @@ Import **faqat pastga**. `shared` hech kimni import qilmaydi.
 
 ## Telegram'ga ulash
 
-Bot: **@ViloyatShtabiBot**
+Bot: **@e_murojaat_bot**
 
 ### Ishlab chiqishda sinash (tunnel)
 
