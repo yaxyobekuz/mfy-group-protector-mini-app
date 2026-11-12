@@ -105,6 +105,19 @@ export default function NewsPage() {
                   <p className="mt-1.5 line-clamp-3 whitespace-pre-wrap text-[13px] leading-relaxed text-muted-foreground">
                     {item.body}
                   </p>
+
+                  {/*
+                    {W} FAYL SONI RO'YXATDA KO'RSATILADI: usiz
+                    fuqaro e'lonni ochmasdan, ichida surat
+                    borligini bilmasdi — va aynan o'sha surat
+                    ko'pincha ENG muhim ma'lumot bo'ladi
+                    (masalan, uzilish jadvali rasmi).
+                  */}
+                  {(item.media?.length ?? 0) > 0 ? (
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      {item.media?.length} ta fayl
+                    </p>
+                  ) : null}
                 </div>
               </button>
             );
@@ -131,6 +144,57 @@ export default function NewsPage() {
             </p>
 
             <p className="whitespace-pre-wrap text-[15px] leading-relaxed">{open.body}</p>
+
+            {/*
+              ── GALEREYA ───────────────────────────────
+
+              ⚠️ MATNDAN KEYIN TURADI, oldidan emas: e'lonning
+              MAZMUNI matnda ("ertaga soat 9 da suv o'chadi") va
+              surat uni faqat TO'LDIRADI. Yuqorida bo'lsa, odam
+              beshta suratni surib o'tib, matnga yetib
+              bormasdi.
+
+              ⚠️ `media` BO'SH BO'LSA UMUMAN CHIZILMAYDI: bo'sh
+              konteyner ham joy egallab, matn bilan sahifa
+              oxiri orasida tushunarsiz bo'shliq qoldirardi.
+            */}
+            {(open.media ?? []).length > 0 ? (
+              <div className="space-y-2">
+                {(open.media ?? []).map((item) => {
+                  const url = fileUrl(item.url);
+                  if (!url) return null;
+
+                  /*
+                    ⚠️ VIDEO `controls` BILAN, `autoPlay` SIZ:
+                    Telegram ichida avtomatik ijro qilinsa, u
+                    mobil internetni fuqaro ruxsatisiz yeb
+                    qo'yardi.
+
+                    ⚠️ `preload="metadata"`: butun faylni oldindan
+                    yuklash 25 MB li video uchun sahifani
+                    ochilmaydigan qilardi.
+                  */
+                  return item.kind === "video" ? (
+                    <video
+                      key={url}
+                      src={url}
+                      controls
+                      preload="metadata"
+                      className="w-full rounded-xl"
+                    />
+                  ) : (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      key={url}
+                      src={url}
+                      alt=""
+                      loading="lazy"
+                      className="w-full rounded-xl object-cover"
+                    />
+                  );
+                })}
+              </div>
+            ) : null}
           </article>
         ) : null}
       </Sheet>

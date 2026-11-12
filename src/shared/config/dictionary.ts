@@ -227,6 +227,10 @@ const MESSAGES = {
   ],
   "category.notFound": ["Mos yo'nalish topilmadi", "Мос йўналиш топилмади", "Ничего не найдено", "No matching type"],
   "category.sla": ["Javob: {value}", "Жавоб: {value}", "Ответ: {value}", "Reply: {value}"],
+  // ⚠️ BOLASI YO'Q ASOSIY YO'NALISHLAR SHU SARLAVHA OSTIDA: ular
+  // o'zi yakuniy tanlov va ularga alohida bo'lim ochish ekranni
+  // bo'sh sarlavhalar bilan to'ldirardi.
+  "category.group.other": ["Boshqa yo'nalishlar", "Бошқа йўналишлар", "Другие направления", "Other types"],
 
   // ── 4-QADAM: TAFSILOT ─────────────────────────────────────────
   "details.placeholder": [
@@ -459,11 +463,36 @@ const MESSAGES = {
   "profile.stat.points": ["Ball", "Балл", "Баллы", "Points"],
   "profile.phone": ["Telefon raqami", "Телефон рақами", "Номер телефона", "Phone number"],
   "profile.phoneHint": [
-    "Ixtiyoriy — ma'muriyat qayta aloqa qilishi uchun",
-    "Ихтиёрий — маъмурият қайта алоқа қилиши учун",
-    "Необязательно — для обратной связи",
-    "Optional — so the administration can reach you",
+    "Murojaat yuborish uchun kerak — xodim shu raqam orqali bog'lanadi",
+    "Мурожаат юбориш учун керак — ходим шу рақам орқали боғланади",
+    "Нужен для подачи обращения — сотрудник свяжется по этому номеру",
+    "Required to submit an appeal — staff will contact you on this number",
   ],
+
+  // ── TELEFON TALABI (murojaat oldidan) ───────────────────
+  //
+  // ⚠️ SABAB AYTILADI, QURUQ TALAB QO'YILMAYDI: "raqam majburiy"
+  // degan gap odamni ortga qaytarardi; "xodim shu raqam orqali
+  // bog'lanadi" esa nima uchun kerakligini tushuntiradi.
+  "phoneGate.title": [
+    "Telefon raqamingiz",
+    "Телефон рақамингиз",
+    "Ваш номер телефона",
+    "Your phone number",
+  ],
+  "phoneGate.hint": [
+    "Murojaatingiz bo'yicha xodim siz bilan shu raqam orqali bog'lanadi. Shuning uchun u majburiy.",
+    "Мурожаатингиз бўйича ходим сиз билан шу рақам орқали боғланади. Шунинг учун у мажбурий.",
+    "Сотрудник свяжется с вами по этому номеру. Поэтому он обязателен.",
+    "Staff will contact you on this number about your appeal, so it is required.",
+  ],
+  "phoneGate.placeholder": [
+    "+998 90 123 45 67",
+    "+998 90 123 45 67",
+    "+998 90 123 45 67",
+    "+998 90 123 45 67",
+  ],
+  "phoneGate.save": ["Saqlash va davom etish", "Сақлаш ва давом этиш", "Сохранить и продолжить", "Save and continue"],
 
   // ── TIL ───────────────────────────────────────────────────────
   "language.title": ["Til", "Тил", "Язык", "Language"],

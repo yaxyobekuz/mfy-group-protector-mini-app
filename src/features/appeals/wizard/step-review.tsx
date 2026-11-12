@@ -180,7 +180,12 @@ export const StepReview = ({
               ingliz tilida noto'g'ri tartib berardi. */}
           <p className="text-[13px] leading-relaxed">
             {t("review.suggestion", {
-              category: suggestion.categoryName,
+              // ⚠️ ASOSIY YO'NALISH BILAN BIRGA: yakka "Ichimlik
+              // suvi" kontekstsiz qolardi va fuqaro uni "Tozalik"
+              // bilan adashtirishi mumkin edi.
+              category: suggestion.parentName
+                ? `${suggestion.parentName} → ${suggestion.categoryName}`
+                : suggestion.categoryName,
               confidence: suggestion.confidence,
             })}
           </p>

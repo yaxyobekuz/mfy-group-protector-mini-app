@@ -98,17 +98,69 @@ export const StepCategory = ({ value, onChange }: Props) => {
   const [search, setSearch] = useState("");
   const t = useT();
 
-  const filtered = useMemo(() => {
-    if (!data) return [];
-    const needle = search.trim().toLowerCase();
-    if (!needle) return data;
+  /**
+   * ── TANLASA BO'LADIGAN YO'NALISHLAR ─────────────────────
+   *
+   * ⚠️ ICHIDA KICHIK YO'NALISHLARI BOR YO'NALISH KARTA BO'LIB
+   * CHIQMAYDI: u faqat SARLAVHA. Tanlansa, bo'linishning ma'nosi
+   * yo'qolardi — hisobotda yana bitta katta uyum paydo bo'lardi
+   * (server ham rad etadi).
+   */
+  const selectable = useMemo(
+    () => (data ?? []).filter((category) => category.selectable),
+    [data],
+  );
 
-    return data.filter(
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    if (!needle) return selectable;
+
+    return selectable.filter(
       (category) =>
         category.name.toLowerCase().includes(needle) ||
         category.description?.toLowerCase().includes(needle),
     );
-  }, [data, search]);
+  }, [selectable, search]);
+
+  /**
+   * ── GURUHLAR ──────────────────────────────────────
+   *
+   * ⚠️ IKKI QADAMLI EKRAN QILINMADI (botdagidan farqli): bu yerda
+   * butun ro'yxat EKRANDA sig'adi va qo'shimcha qadam fuqaroni
+   * keraksiz bosishga majbur qilardi. Guruh sarlavhasi esa
+   * "Ichimlik suvi" qaysi bo'limga tegishli ekanini ko'rsatadi.
+   *
+   * ⚠️ QIDIRUVDA GURUHLAR YO'QOLADI: qidirayotgan odam bo'lim
+   * emas, NOM izlaydi — sarlavhalar natijani uzaytirib, uni
+   * qiyinlashtirardi.
+   */
+  const groups = useMemo(() => {
+    if (!data || search.trim()) return null;
+
+    const roots = data.filter((category) => !category.parentId);
+    const result: { key: string; title: string | null; items: Category[] }[] = [];
+
+    for (const root of roots) {
+      const children = data.filter((category) => category.parentId === root.id);
+      if (children.length > 0) {
+        result.push({ key: root.id, title: root.name, items: children });
+      }
+    }
+
+    // ⚠️ BOLASI YO'Q ASOSIY YO'NALISHLAR — BITTA BO'LIMDA: har
+    // biriga alohida sarlavha ochish ekranni bo'sh sarlavhalar
+    // bilan to'ldirardi.
+    const standalone = roots.filter((root) => !root.hasChildren);
+    if (standalone.length > 0) {
+      result.push({
+        key: "__standalone__",
+        title: result.length > 0 ? t("category.group.other") : null,
+        items: standalone,
+      });
+    }
+
+    return result;
+  }, [data, search, t]);
 
   if (isLoading) {
     return (
@@ -126,7 +178,7 @@ export const StepCategory = ({ value, onChange }: Props) => {
 
   return (
     <div className="space-y-4">
-      {data.length > SEARCH_THRESHOLD ? (
+      {selectable.length > SEARCH_THRESHOLD ? (
         <Field
           placeholder={t("category.search")}
           value={search}
@@ -140,10 +192,34 @@ export const StepCategory = ({ value, onChange }: Props) => {
         <p className="py-10 text-center text-sm text-muted-foreground">
           {t("category.notFound")}
         </p>
+      ) : groups ? (
+        <div className="space-y-5">
+          {groups.map((group) => (
+            <div key={group.key} className="space-y-2">
+              {group.title ? (
+                <p className="text-[13px] font-semibold text-muted-foreground">
+                  {group.title}
+                </p>
+              ) : null}
+
+              {/* ⚠️ UCH USTUN: mockup'dagi tartib. Ikki ustun
+                  bo'lsa ro'yxat ikki barobar uzayib, oxirgi
+                  yo'nalishlar ekrandan chiqib ketardi. */}
+              <div className="grid grid-cols-3 gap-2.5">
+                {group.items.map((category) => (
+                  <CategoryCard
+                    key={category.id}
+                    category={category}
+                    selected={value === category.id}
+                    onSelect={() => onChange(category.id)}
+                    t={t}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
-        /* ⚠️ UCH USTUN: mockup'dagi tartib. Ikki ustun bo'lsa
-           ro'yxat ikki barobar uzayib, oxirgi yo'nalishlar
-           ekrandan chiqib ketardi. */
         <div className="grid grid-cols-3 gap-2.5">
           {filtered.map((category) => (
             <CategoryCard

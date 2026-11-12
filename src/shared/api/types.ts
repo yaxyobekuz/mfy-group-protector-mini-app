@@ -48,6 +48,22 @@ export interface CitizenProfile {
   points: number;
   createdAt: string;
   stats: { total: number; open: number; resolved: number };
+
+  /**
+   * ── TELEFON MAJBURIYMI ─────────────────────────────────
+   *
+   * ⚠️ QIYMAT SERVERDAN KELADI (`Settings.requirePhone`), ilovada
+   * QOTIB QOLMAYDI: sozlama panelda o'zgarsa, ilovani yangilash
+   * kerak bo'lmasligi kerak.
+   *
+   * ⚠️ IXTIYORIY: kirish javobida (`LoginResponse.citizen`) bu
+   * maydonlar YO'Q — ular faqat `/mobile/me` da to'liq profil bilan
+   * keladi. Majburiy qilinsa, eski javob TypeScript'da xato
+   * bo'lardi.
+   */
+  requirePhone?: boolean;
+  /** ⚠️ Tayyor javob: "hozir raqam so'rash kerakmi". */
+  phoneNeeded?: boolean;
 }
 
 export interface LoginResponse {
@@ -68,6 +84,20 @@ export interface Category {
   icon: string | null;
   slaHours: number;
   orgName: string | null;
+
+  /**
+   * ── IKKI DARAJALI RO'YXAT ───────────────────────────
+   *
+   * ⚠️ `parentId` — ASOSIY yo'nalish id'si (`null` — o'zi asosiy).
+   * Daraxt serverda qurilmaydi: mijozlar uni turlicha ko'rsatadi
+   * (bot — ikki qadamli tugma, ilova — guruhlangan to'r).
+   *
+   * ⚠️ `selectable: false` — ichida kichik yo'nalishlari bor
+   * yo'nalish. U YAKUNIY tanlov bo'la olmaydi (server rad etadi).
+   */
+  parentId: string | null;
+  hasChildren: boolean;
+  selectable: boolean;
 }
 
 export interface Territory {
@@ -177,10 +207,25 @@ export interface AnalysisResponse {
     categoryId: string;
     categoryName: string;
     categoryIcon: string | null;
+    /**
+     * ⚠️ ASOSIY YO'NALISH NOMI — "Kommunal xizmatlar → Ichimlik
+     * suvi". Yakka "Ichimlik suvi" degan taklif kontekstsiz
+     * qolardi va fuqaro uni "Tozalik" bilan adashtirishi mumkin edi.
+     */
+    parentName: string | null;
     confidence: number;
     priority: Priority;
     slaHours: number;
     orgName: string | null;
+    /**
+     * ⚠️ AI MATNDAN CHIQARGAN SHOSHILINCHLIK BAHOSI —
+     * KO'RSATILADI, LEKIN MUDDATNI BELGILAMAYDI: muddat yo'nalish
+     * SLA'si yoki MFY qoidasidan chiqadi va tavsiyani panelda XODIM
+     * qo'llaydi ("mobil AI: taklif, qaror emas").
+     */
+    urgency: string;
+    urgencyLabel: string;
+    suggestedDueHours: number;
   } | null;
   /** ⚠️ SERVER IMZOSI — `POST /mobile/appeals` ga shundayligicha uzatiladi. */
   token: string | null;
@@ -199,6 +244,20 @@ export interface MapPoint {
   category: { id: string; name: string; color: string | null; icon: string | null };
 }
 
+/**
+ * E'LONGA QO'SHILGAN FAYL.
+ *
+ * ⚠️ `coverUrl` NING O'RNINI BOSMAYDI: muqova — ro'yxatdagi BITTA
+ * surat, media esa e'lon ICHIDAGI galereya. Eski ilovalar `media`
+ * ni bilmaydi va faqat muqovani ko'rsatadi — ya'ni do'kondagi
+ * eski nusxa buzilmaydi.
+ */
+export interface NewsMedia {
+  kind: "photo" | "video";
+  url: string;
+  mimeType: string;
+}
+
 export interface NewsItem {
   id: string;
   title: string;
@@ -208,6 +267,12 @@ export interface NewsItem {
   publishedAt: string | null;
   viewCount: number;
   districtName: string | null;
+  /**
+   * ⚠️ IXTIYORIY: server eski e'lonlar uchun bo'sh massiv
+   * qaytaradi, lekin tur `optional` — maydon umuman
+   * kelmaydigan holatda ilova yiqilmasligi kerak.
+   */
+  media?: NewsMedia[];
 }
 
 export interface RatingRow {

@@ -23,6 +23,7 @@ import { ArrowRight, Send, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { useSession } from "@/entities/session/session-provider";
 import { useCategories, useAnalyze, useCreateAppeal } from "@/features/appeals/api";
 import { BODY_MIN, MAX_ATTACHMENTS } from "@/shared/config/limits";
 import { WIZARD_STEPS } from "@/shared/config/labels";
@@ -35,6 +36,7 @@ import { StepCategory } from "./step-category";
 import { StepDetails } from "./step-details";
 import { StepLocation } from "./step-location";
 import { StepMedia } from "./step-media";
+import { PhoneGate } from "./phone-gate";
 import { StepReview } from "./step-review";
 import { SuccessScreen } from "./success-screen";
 import {
@@ -51,6 +53,22 @@ const LAST_STEP = WIZARD_STEPS.length - 1;
 
 export const Wizard = () => {
   const router = useRouter();
+
+  const { citizen } = useSession();
+
+  /**
+   * ── TELEFON TALABI ────────────────────────────────────────────
+   *
+   * ⚠️ SEHRGARDAN OLDIN TEKSHIRILADI: server telefonsiz murojaatni
+   * RAD ETADI va agar raqam oxirgi qadamda so'ralsa, fuqaro besh
+   * qadamni to'ldirib bo'lgandan keyin to'siqqa urilardi
+   * (`phone-gate.tsx` izohi).
+   *
+   * ⚠️ HOLAT ALOHIDA SAQLANADI, chunki `citizen` keshdan keladi:
+   * raqam saqlangach ekran DARHOL yopilishi kerak, qayta o'qish
+   * so'rovi qaytishini kutmasdan.
+   */
+  const [phoneDone, setPhoneDone] = useState(false);
 
   const [step, setStep] = useState(0);
   const [state, setState] = useState<WizardState>(EMPTY_STATE);
@@ -202,6 +220,22 @@ export const Wizard = () => {
   // ── MUVAFFAQIYAT EKRANI ──────────────────────────────────────
   if (created) {
     return <SuccessScreen appeal={created} />;
+  }
+
+  /**
+   * ── TELEFON EKRANI ────────────────────────────────────────────
+   *
+   * ⚠️ FAQAT RAQAM YO'Q BO'LSA: raqami bor fuqaroga bu ekran UMUMAN
+   * ko'rsatilmaydi — aks holda qayta murojaat yozayotgan odam har
+   * safar ortiqcha qadamdan o'tardi.
+   *
+   * ⚠️ MUVAFFAQIYAT EKRANIDAN KEYIN TEKSHIRILADI: murojaat
+   * yuborilgandan so'ng raqam baribir bor va bu shart ishlamaydi —
+   * lekin tartib muhim, aks holda yuborilgan murojaat natijasi
+   * o'rniga telefon ekrani chiqib qolishi mumkin edi.
+   */
+  if (citizen.phoneNeeded && !phoneDone) {
+    return <PhoneGate onDone={() => setPhoneDone(true)} />;
   }
 
   const current = WIZARD_STEPS[step]!;
